@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="capture_shot">Screenshot</string>
+  <string name="capture_record_start">Record</string>
+  <string name="capture_record_stop">Stop rec</string>
+  <string name="screenshot_saved">Screenshot saved to Pictures/FelisLink</string>
+  <string name="screenshot_failed">Screenshot failed: frame not ready</string>
+  <string name="recording_started">Recording started (video only, no audio)</string>
+  <string name="recording_denied">Recording was not authorised</string>
+  <string name="recording_failed">Could not start recording</string>
+  <string name="recording_saved">Recording saved to Movies/FelisLink</string>
+  <string name="recording_notification_channel">Screen recording</string>
+  <string name="recording_notification_channel_summary">Shown while FelisLink records the screen</string>
+  <string name="recording_notification_title">Recording screen</string>
+  <string name="recording_notification_text">Playing back the capture card on this phone</string>
+  <string name="recording_action_stop">Stop</string>
+</resources>

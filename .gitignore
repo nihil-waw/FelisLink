@@ -1,0 +1,22 @@
+# Gradle / Android build output
+.gradle/
+.kotlin/
+build/
+app/build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.log
+
+# Local machine configuration (never commit: contains absolute SDK/CMake paths)
+local.properties
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+
+# Locally built APKs / bundles (publish those through GitHub Releases)
+FelisLink-*.apk
+*.aab
+__pycache__/

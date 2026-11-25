@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  FelisLink settings screen strings.
+  Licensed under the Apache License, Version 2.0.
+-->
+<resources>
+
+  <string name="settings_title">Settings</string>
+  <string name="settings_back">Back</string>
+  <string name="settings_open">Open settings</string>
+
+  <string name="settings_section_general">General</string>
+  <string name="settings_section_display">Picture &amp; display</string>
+  <string name="settings_section_about">About</string>
+
+  <string name="settings_language">Language</string>
+  <string name="settings_language_summary">Follow the system language or force one for FelisLink.</string>
+  <string name="language_system">Follow system</string>
+  <string name="language_english" translatable="false">English</string>
+  <string name="language_chinese">Chinese (Simplified)</string>
+
+  <string name="settings_rotation">Screen rotation</string>
+  <string name="settings_rotation_summary">Auto follows the phone\'s sensors; lock landscape for a second screen.</string>
+  <string name="rotation_system">Auto (sensor)</string>
+  <string name="rotation_landscape">Landscape</string>
+  <string name="rotation_portrait">Portrait</string>
+
+  <string name="settings_resolution">Capture resolution</string>
+  <string name="settings_resolution_summary">Preferred UVC resolution. Falls back to the closest format the card offers.</string>
+  <string name="resolution_auto">Auto (match screen)</string>
+  <string name="resolution_fhd">1920 × 1080</string>
+  <string name="resolution_hd">1280 × 720</string>
+  <string name="resolution_sd">640 × 480</string>
+
+  <string name="settings_color_format">Color format</string>
+  <string name="settings_color_format_summary">Preferred UVC pixel format. MJPEG needs less USB bandwidth.</string>
+  <string name="color_format_auto">Auto</string>
+  <string name="color_format_mjpeg">MJPEG</string>
+  <string name="color_format_yuyv">YUYV</string>
+  <string name="color_format_nv12">NV12</string>
+
+  <string name="settings_hud">Stats overlay (HUD)</string>
+  <string name="settings_hud_summary">Shows fps, format and timing over the video. Off means a clean picture.</string>
+
+  <string name="settings_keep_screen_on">Keep screen on</string>
+  <string name="settings_keep_screen_on_summary">Prevents the screen from sleeping while FelisLink is in the foreground.</string>
+
+  <string name="settings_immersive">Immersive fullscreen</string>
+  <string name="settings_immersive_summary">Hides the system bars so the picture fills the panel.</string>
+
+  <string name="settings_on">On</string>
+  <string name="settings_off">Off</string>
+  <string name="settings_value_format">%1$s ›</string>
+
+  <string name="settings_about_version">FelisLink %1$s</string>
+  <string name="settings_about_note">Capture engine based on Meta usb-video (Apache-2.0). Rotation, HUD, screen-on and immersive take effect right away; resolution and color format apply the next time a capture card connects.</string>
+
+
+  <string name="settings_section_advanced">Advanced capture</string>
+  <string name="settings_fps_cap">Frame rate cap</string>
+  <string name="settings_fps_cap_summary">Upper bound for the capture frame rate. Cards often advertise 60 fps but cannot sustain it over USB 2.0.</string>
+  <string name="settings_fps_cap_unlimited">No limit</string>
+  <string name="settings_fps_cap_value">%1$d fps</string>
+  <string name="settings_compression_quality">Compression quality</string>
+  <string name="settings_compression_quality_note">Not adjustable: libuvc exposes no UVC Compression Control, so MJPEG quality is fixed by the card firmware and the format you pick. Disabled on purpose instead of faking a slider.</string>
+  <string name="settings_auto_downgrade">Auto downgrade</string>
+  <string name="settings_auto_downgrade_summary">Drop one format step when frames stall. The stutter detector is not wired yet; this build only stores the preference.</string>
+  <string name="settings_apply_timing">When it applies</string>
+  <string name="settings_apply_timing_summary">Resolution, frame-rate cap and color format are used the next time a capture card connects. The status screen can still override the format live.</string>
+
+  <string name="capture_profile_dialog_title">Capture card profile</string>
+  <string name="capture_profile_device">Device: %1$s</string>
+  <string name="capture_profile_chipset">Chipset: %1$s (label only)</string>
+  <string name="capture_profile_link_usb3">Link: USB 3.0</string>
+  <string name="capture_profile_link_usb2">Link: USB 2.0 (480 Mbps)</string>
+  <string name="capture_profile_link_unknown">Link: unknown, treating it as USB 2.0</string>
+  <string name="capture_profile_audio_yes">Audio: detected, will be captured</string>
+  <string name="capture_profile_audio_no">Audio: this card exposes no UAC, video only</string>
+  <string name="capture_profile_selected">Format: %1$s</string>
+  <string name="capture_profile_reason_usb3">USB 3.0 link, so uncompressed formats are preferred to save CPU.</string>
+  <string name="capture_profile_reason_usb2">USB 2.0 link, so we stay on compressed MJPEG to avoid dropped frames.</string>
+  <string name="capture_profile_reason_user">Chosen from your pixel-format preference.</string>
+  <string name="capture_profile_fallbacks">Fallback if it stutters: %1$s</string>
+  <string name="capture_profile_note">Compressed-image quality comes from the card firmware; libuvc has no compression control.</string>
+  <string name="capture_profile_apply">Use this profile</string>
+  <string name="capture_profile_manual">Choose manually</string>
+
+
+  <!-- capture presets and self-healing (0.4.0) -->
+  <string name="settings_preset">Format preset</string>
+  <string name="settings_preset_summary">A preset pins resolution + fps. Changing resolution, fps limit or color format later switches to Custom.</string>
+  <string name="capture_preset_auto">Auto (by link speed)</string>
+  <string name="capture_preset_fhd60">1080p60</string>
+  <string name="capture_preset_fhd30">1080p30</string>
+  <string name="capture_preset_hd60">720p60</string>
+  <string name="capture_preset_hd30">720p30</string>
+  <string name="capture_preset_sd30">480p30</string>
+  <string name="capture_preset_custom">Custom</string>
+  <string name="settings_auto_connect">Auto-connect</string>
+  <string name="settings_auto_connect_summary">Start capturing as soon as a supported card is attached, no tap needed.</string>
+  <string name="settings_touch_lock">Lock touch</string>
+  <string name="settings_touch_lock_summary">Ignore taps and gestures on the picture. Long-press the picture to unlock.</string>
+  <string name="stutter_dialog_title">Stutter detected</string>
+  <string name="stutter_dialog_message">Measured %1$d fps in the last few seconds, below the %2$d fps target.\n\nDrop one step to %3$s?</string>
+  <string name="stutter_dialog_downgrade">Downgrade</string>
+  <string name="stutter_dialog_keep">Keep current</string>
+  <string name="stutter_dialog_never">Don\'t ask again</string>
+  <string name="capture_auto_downgraded">Stutter detected, dropped to %1$s</string>
+  <string name="reconnect_in_progress">No frames arriving, restarting capture…</string>
+  <string name="reconnect_failed">Reconnect failed. Unplug and re-plug the capture card.</string>
+  <string name="touch_unlocked">Touch unlocked</string>
+  <string name="auto_connect_started">Auto-started: %1$s</string>
+  <string name="capture_profile_reason_preset_matched">Preset matched exactly</string>
+  <string name="capture_profile_reason_preset_fallback">Preset unavailable, nearest format used</string>
+  <string name="settings_audio_route">Audio output</string>
+  <string name="settings_audio_route_note">Follows the system: Android routes the card\'s sound to headphones, Bluetooth or the speaker by itself. Picking an output device inside the app would need a signature system permission, so routing stays with the system.</string>
+
+  <!-- fill mode + status reset (0.5.2) -->
+  <string name="settings_fill_mode">Picture fill</string>
+  <string name="settings_fill_mode_summary">How the capture picture is fitted into the screen.</string>
+  <string name="fill_mode_original">Original (keep aspect, black bars)</string>
+  <string name="fill_mode_stretch">Stretch (fill, may distort)</string>
+  <string name="fill_mode_crop">Crop (fill, keep aspect, trim edges)</string>
+  <string name="reset_streaming">Reset</string>
+  <string name="reset_streaming_done">Re-matched with current settings: %1$s</string>
+  <string name="reset_streaming_failed">Reset failed: no usable capture format</string>
+  <string name="reset_streaming_need_card">Reset failed: no capture card connected</string>
+</resources>

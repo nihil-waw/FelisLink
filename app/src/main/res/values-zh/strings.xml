@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) Meta Platforms, Inc. and affiliates.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="connect_device_title">连接你的设备</string>
+  <string name="app_requirements">请插入采集卡的 USB-C 输出线。</string>
+  <string name="unmute_mic_tip">USB 采集卡需要麦克风权限才能连接并采集音频。请在系统设置中取消静音后再继续。</string>
+  <string name="device_connected_with_name_by_manufacturer">已连接到 %1$s（制造商：%2$s）</string>
+  <string name="device_connected_with_details">已连接到 %1$s，速度 %2$s</string>
+  <string name="audio_streaming_failure">音频串流失败。%1$s</string>
+  <string name="usb_video_streaming_started">视频串流已开始。</string>
+  <string name="video_streaming_failed_start">视频串流启动失败。</string>
+  <string name="video_streaming_failure">视频串流失败。%1$s</string>
+  <string name="uvc_device_not_found">未检测到 USB 采集卡</string>
+  <string name="device_attached_with_name_by_manufacturer">已检测到 %1$s（制造商：%2$s）</string>
+  <string name="uvc_device_detached">USB 采集卡已断开连接</string>
+  <string name="uvc_device_permission_denied">USB 权限已被拒绝</string>
+  <string name="uvc_device_permission_granted">USB 设备权限已授予</string>
+  <string name="uvc_device_permission_required_for_name_by_manufacturer">访问 %1$s（制造商：%2$s）需要 USB 权限</string>
+  <string name="uvc_camera_and_record_permission_requirement">访问 %1$s（制造商：%2$s）需要相机和录音权限。</string>
+  <string name="uvc_device_permission_requested">已请求 USB 设备权限</string>
+  <string name="start_streaming_wait_state">正在启动串流…</string>
+  <string name="uvc_streaming_stopping">正在停止串流…</string>
+  <string name="uvc_streaming_stopped">串流已停止。</string>
+  <string name="streaming_stats_toggle_tip">点击切换状态栏 · 长按打开设置</string>
+  <string name="video_streaming_low_fps_warn">⚠ %1$s 下预计会出现性能下降。</string>
+  <string name="expect_degraded_performance">⚠ 检测到 USB %1$s 连接，预计性能会下降。请确保使用兼容 USB 3.0 SuperSpeed 的采集卡和连接线。</string>
+  <string name="video_streaming_format_not_found">未找到支持的格式。</string>
+  <string name="select_video_format">选择采集视频帧格式</string>
+  <string name="video_format_configure_failure">视频帧格式协商失败，请尝试其他设置。</string>
+  <string name="start_streaming">开始串流</string>
+  <string name="setup_explanation">连接 USB 采集卡的检查清单</string>
+  <string name="camera">相机</string>
+  <string name="camera_permission_explanation">需要相机权限才能连接 UVC 设备并采集视频。</string>
+  <string name="camera_permission_denied">相机权限已被拒绝。如果没有看到权限提示，请在系统设置中授予权限，或重新安装应用以重新开始。</string>
+  <string name="record_audio">录音</string>
+  <string name="record_audio_explanation">需要录音权限才能连接 UVC 设备并采集音频。</string>
+  <string name="record_audio_permission_denied">录音权限已被拒绝。如果没有看到权限提示，请在系统设置中授予权限，或重新安装应用以重新开始。</string>
+  <string name="usb">USB</string>
+  <string name="success">成功</string>
+  <string name="usb_connect_failure">请重新连接采集卡后再试。</string>
+  <string name="no_audio_interface">未找到音频接口。</string>
+  <string name="no_audio_format">没有支持的音频格式。</string>
+  <string name="no_audio_sampling">未找到音频采样率。</string>
+  <string name="no_video_interface">未找到视频接口。</string>
+  <string name="no_video_format">没有支持的视频格式。</string>
+  <string name="usb_speed_super_speed">超高速</string>
+  <string name="usb_speed_high_speed">高速</string>
+  <string name="usb_speed_full_speed">全速</string>
+  <string name="usb_speed_low_speed">低速</string>
+
+  <string name="audio_format_pcm_8">PCM8</string>
+  <string name="audio_format_pcm_16">PCM16</string>
+  <string name="audio_format_pcm_float">PCM 浮点</string>
+  <string name="audio_format_unknown">未知</string>
+
+  <string name="video_fourcc_format_YUYV">YUYV</string>
+  <string name="video_fourcc_format_UYVY">UYVY</string>
+  <string name="video_fourcc_format_MJPG">MJPG</string>
+  <string name="video_fourcc_format_H264">H264</string>
+  <string name="video_fourcc_format_NV12">NV12</string>
+  <string name="video_format_unknown">未知</string>
+
+  <string name="audio_streaming_short_summary_line"><xliff:g id="audio_format">%1$s</xliff:g> <xliff:g id="num_audio_channels">%2$d</xliff:g> 声道 <xliff:g id="sampling_frequency">%3$d</xliff:g></string>
+  <string name="video_streaming_short_summary_line"><xliff:g id="fourcc_format">%1$s</xliff:g> <xliff:g id="width">%2$d</xliff:g>×<xliff:g id="height">%3$d</xliff:g> @<xliff:g id="fps">%4$d</xliff:g>fps</string>
+  <string name="camera_icon_content_description">相机权限图标</string>
+  <string name="camera_permissions_status_content_description">相机权限状态</string>
+  <string name="usb_device_permission_status_content_description">USB 设备权限状态</string>
+  <string name="record_audio_icon_content_description">录音权限图标</string>
+  <string name="record_audio_permissions_status_content_description">录音权限状态</string>
+  <string name="usb_icon_content_description">USB 设备权限图标</string>
+  <string name="capture_card_image_content_description">USB 采集卡图片</string>
+
+  <string name="usb_link_status">USB 链路：%1$s</string>
+  <string name="usb_link_usb3">USB 3.x（SuperSpeed）</string>
+  <string name="usb_link_usb2">USB 2.0（High Speed）</string>
+  <string name="usb_link_usb1_full">USB 1.1（Full Speed）</string>
+  <string name="usb_link_usb1_low">USB 1.1（Low Speed）</string>
+  <string name="usb_link_unknown">USB 链路：检测中…</string>
+</resources>

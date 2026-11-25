@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="capture_shot">截图</string>
+  <string name="capture_record_start">录制画面</string>
+  <string name="capture_record_stop">停止录制</string>
+  <string name="screenshot_saved">截图已保存到相册 Pictures/FelisLink</string>
+  <string name="screenshot_failed">截图失败：画面还没就绪</string>
+  <string name="recording_started">开始录制采集画面（无声音）</string>
+  <string name="recording_denied">未授权</string>
+  <string name="recording_failed">录制启动失败</string>
+  <string name="recording_saved">录制已保存到 Movies/FelisLink</string>
+  <string name="recording_notification_channel">屏幕录制</string>
+  <string name="recording_notification_channel_summary">FelisLink 录屏时显示</string>
+  <string name="recording_notification_title">正在录屏</string>
+  <string name="recording_notification_text">正在把采集卡画面显示在本机</string>
+  <string name="recording_action_stop">停止</string>
+</resources>

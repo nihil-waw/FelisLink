@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  FelisLink settings screen strings.
+  Licensed under the Apache License, Version 2.0.
+-->
+<resources>
+
+  <string name="settings_title">设置</string>
+  <string name="settings_back">返回</string>
+  <string name="settings_open">打开设置</string>
+
+  <string name="settings_section_general">通用</string>
+  <string name="settings_section_display">画面与显示</string>
+  <string name="settings_section_about">关于</string>
+
+  <string name="settings_language">语言</string>
+  <string name="settings_language_summary">跟随系统语言，或为 FelisLink 指定一种语言。</string>
+  <string name="language_system">跟随系统</string>
+  <string name="language_chinese">简体中文</string>
+
+  <string name="settings_rotation">屏幕旋转</string>
+  <string name="settings_rotation_summary">自动=跟随手机方向（含传感器）。副屏场景建议锁横屏。</string>
+  <string name="rotation_system">自动（传感器）</string>
+  <string name="rotation_landscape">横屏</string>
+  <string name="rotation_portrait">竖屏</string>
+
+  <string name="settings_resolution">采集分辨率</string>
+  <string name="settings_resolution_summary">首选的 UVC 分辨率。若不可用，将回退到采集卡支持的最接近格式。</string>
+  <string name="resolution_auto">自动（匹配屏幕）</string>
+  <string name="resolution_fhd">1920 × 1080</string>
+  <string name="resolution_hd">1280 × 720</string>
+  <string name="resolution_sd">640 × 480</string>
+
+  <string name="settings_color_format">色彩格式</string>
+  <string name="settings_color_format_summary">首选的 UVC 像素格式。MJPEG 占用的 USB 带宽更少。</string>
+  <string name="color_format_auto">自动</string>
+  <string name="color_format_mjpeg">MJPEG</string>
+  <string name="color_format_yuyv">YUYV</string>
+  <string name="color_format_nv12">NV12</string>
+
+  <string name="settings_hud">统计信息浮层（HUD）</string>
+  <string name="settings_hud_summary">在画面上显示帧率、格式和耗时。关闭后画面更干净。</string>
+
+  <string name="settings_keep_screen_on">保持屏幕常亮</string>
+  <string name="settings_keep_screen_on_summary">FelisLink 在前台运行时阻止屏幕休眠。</string>
+
+  <string name="settings_immersive">沉浸式全屏</string>
+  <string name="settings_immersive_summary">隐藏系统栏，让画面铺满整块屏幕。</string>
+
+  <string name="settings_on">开</string>
+  <string name="settings_off">关</string>
+  <string name="settings_value_format">%1$s ›</string>
+
+  <string name="settings_about_version">FelisLink %1$s</string>
+  <string name="settings_about_note">采集引擎基于 Meta usb-video（Apache-2.0）。旋转、HUD、屏幕常亮和沉浸式设置会立即生效；分辨率和色彩格式将在下次连接采集卡时应用。</string>
+
+
+  <string name="settings_section_advanced">高级采集</string>
+  <string name="settings_fps_cap">帧率上限</string>
+  <string name="settings_fps_cap_summary">采集帧率的上限。很多采集卡标称 60 fps，但在 USB 2.0 上跑不满。</string>
+  <string name="settings_fps_cap_unlimited">不限制</string>
+  <string name="settings_fps_cap_value">%1$d fps</string>
+  <string name="settings_compression_quality">压缩质量</string>
+  <string name="settings_compression_quality_note">不可调：libuvc 没有开放 UVC Compression Control，MJPEG 画质由采集卡固件和所选格式决定。这里如实说明，不做假滑块。</string>
+  <string name="settings_auto_downgrade">自动降级</string>
+  <string name="settings_auto_downgrade_summary">画面掉帧时自动降一档格式。卡顿检测尚未接入，当前版本只保存这个开关。</string>
+  <string name="settings_apply_timing">生效时机</string>
+  <string name="settings_apply_timing_summary">分辨率、帧率上限、色彩格式在下次接入采集卡时生效；连接后仍可在状态页手动改格式。</string>
+
+  <string name="capture_profile_dialog_title">采集卡配置</string>
+  <string name="capture_profile_device">设备：%1$s</string>
+  <string name="capture_profile_chipset">芯片：%1$s（仅用于显示）</string>
+  <string name="capture_profile_link_usb3">链路：USB 3.0</string>
+  <string name="capture_profile_link_usb2">链路：USB 2.0（480 Mbps）</string>
+  <string name="capture_profile_link_unknown">链路：未知，按 USB 2.0 处理</string>
+  <string name="capture_profile_audio_yes">音频：已检测到，会一起采集</string>
+  <string name="capture_profile_audio_no">音频：该卡未暴露 UAC，仅采集画面</string>
+  <string name="capture_profile_selected">已选格式：%1$s</string>
+  <string name="capture_profile_reason_usb3">USB 3.0 链路，优先用低压缩格式，省 CPU。</string>
+  <string name="capture_profile_reason_usb2">USB 2.0 链路，自动走 MJPEG 压缩格式，避免掉帧。</string>
+  <string name="capture_profile_reason_user">按你设置的色彩格式偏好选择。</string>
+  <string name="capture_profile_fallbacks">卡顿时可降到：%1$s</string>
+  <string name="capture_profile_note">压缩画质由采集卡固件决定，libuvc 没有压缩控制接口。</string>
+  <string name="capture_profile_apply">用这套配置</string>
+  <string name="capture_profile_manual">手动选择</string>
+
+
+  <!-- capture presets and self-healing (0.4.0) -->
+  <string name="settings_preset">格式预设</string>
+  <string name="settings_preset_summary">预设会锁定分辨率与帧率；之后手动改分辨率 / 帧率上限 / 色彩格式会自动切到「自定义」。</string>
+  <string name="capture_preset_auto">自动（按链路速率）</string>
+  <string name="capture_preset_fhd60">1080p60</string>
+  <string name="capture_preset_fhd30">1080p30</string>
+  <string name="capture_preset_hd60">720p60</string>
+  <string name="capture_preset_hd30">720p30</string>
+  <string name="capture_preset_sd30">480p30</string>
+  <string name="capture_preset_custom">自定义</string>
+  <string name="settings_auto_connect">插卡自动开始</string>
+  <string name="settings_auto_connect_summary">插上采集卡直接开始采集，不用再点开始。</string>
+  <string name="settings_touch_lock">触控锁定</string>
+  <string name="settings_touch_lock_summary">忽略画面上的点和手势，防止误触；长按画面即可解锁。</string>
+  <string name="stutter_dialog_title">检测到画面卡顿</string>
+  <string name="stutter_dialog_message">最近几秒实测 %1$d fps，低于目标的 %2$d fps。\n\n降到 %3$s 换流畅？</string>
+  <string name="stutter_dialog_downgrade">降级</string>
+  <string name="stutter_dialog_keep">保持当前</string>
+  <string name="stutter_dialog_never">不再提示</string>
+  <string name="capture_auto_downgraded">检测到卡顿，已自动降到 %1$s</string>
+  <string name="reconnect_in_progress">画面无数据，正在重启采集…</string>
+  <string name="reconnect_failed">重连失败，请重新插拔采集卡</string>
+  <string name="touch_unlocked">触控已解锁</string>
+  <string name="auto_connect_started">已自动开始采集：%1$s</string>
+  <string name="capture_profile_reason_preset_matched">预设精确命中</string>
+  <string name="capture_profile_reason_preset_fallback">预设不支持，已取最接近的格式</string>
+  <string name="settings_audio_route">音频输出</string>
+  <string name="settings_audio_route_note">跟随系统：Android 会自己把采集卡的声音送到当前耳机、蓝牙或扬声器。App 内定向需要系统签名权限，所以路由交给系统管。</string>
+
+  <!-- fill mode + status reset (0.5.2) -->
+  <string name="settings_fill_mode">画面填充</string>
+  <string name="settings_fill_mode_summary">采集画面怎么铺到屏幕上。</string>
+  <string name="fill_mode_original">原始（等比例，留黑边）</string>
+  <string name="fill_mode_stretch">拉伸（填满，可能变形）</string>
+  <string name="fill_mode_crop">裁切（填满，等比例裁边）</string>
+  <string name="reset_streaming">重置</string>
+  <string name="reset_streaming_done">已按当前设置重新匹配：%1$s</string>
+  <string name="reset_streaming_failed">重置失败：没有可用的采集格式</string>
+  <string name="reset_streaming_need_card">重置失败：采集卡还没连上</string>
+</resources>
