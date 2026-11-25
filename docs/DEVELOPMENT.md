@@ -4,7 +4,115 @@
 按时间顺序追加，`## n.` 的编号顺序即迭代顺序，最近的在最后。
 
 > 内容来自开发时的本地笔记，路径与机型信息已做脱敏；对复现构建没帮助的临时环境细节可以忽略。
-> 构建说明见 [README](../README.md#从源码构建)，版本变化见 [CHANGELOG](../CHANGELOG.md)。
+> 构建说明见 [README](../README.md#从源码构建)，版本变化见本文件的「变更日志」与「版本记录」段落。
+
+---
+
+# 变更日志（CHANGELOG）
+
+> 以下内容合并自原 `CHANGELOG.md`，采用 Keep a Changelog 格式，按版本倒序。
+
+本文件记录 FelisLink（Meta usb-video 的二次开发分支）自己的改动；上游历史见
+[facebookexperimental/usb-video](https://github.com/facebookexperimental/usb-video) 的提交记录。
+格式参考 [Keep a Changelog](https://keepachangelog.com/)，版本号沿用 `0.x.y`。
+
+## [0.5.5] - 2026-11-25
+
+### Fixed
+- 状态页「重置」在串流中/串流后按下时误报「没有可用的采集格式」：旧实现只接受 `ConnectedUsbDevice`，
+  串流时状态是 `StreamingUsbDeviceState`，第一行 `as?` 就返回失败。现在重置在任何已连接状态都可用——
+  串流中按下会按当前设置重新评估格式，拆掉 native 管线后由状态机 `Stopped → Restart` 用新格式重开。
+- 重置失败的提示区分两种原因：采集卡未连接 / 采集卡没有可用格式（新增文案 `reset_streaming_need_card`）。
+
+## [0.5.4] - 2026-11-25
+
+### Added
+- 状态页显示实时 USB 链路版本（USB 3.x / 2.0 / 1.1），每秒刷新。
+- 设置「帧率上限」增加 120 fps 选项。
+
+### Changed
+- 状态页帧率下拉列出采集卡上报的全部帧率，去重并降序排列（YUYV 可到 60、MJPEG 可到 120，前提是卡上报了）。
+- 「原始」填充改为等比例居中缩放（1:1 像素直出），左右黑边对称。
+- 状态页内容包进 `ScrollView`，窄屏 / 横屏可滚动。
+
+## [0.5.3] - 2026-11-25
+
+### Fixed
+- 0.5.2 启动即崩（`NoSuchMethodException: StreamerViewModel.<init> [class android.app.Application]`）：
+  移除 MediaProjection 时删多了，把显式的 `viewModelFactory` 一起删掉，默认工厂只认单参构造。
+
+## [0.5.2] - 2026-11-25
+
+### Added
+- 内置录制：MediaCodec + EGL 把采集画面编码成 MP4（`Movies/FelisLink`），不再录手机屏幕。
+- 状态页「开始串流」旁新增「重置」。
+- 设置新增「画面填充」：原始 / 拉伸 / 裁切。
+
+### Removed
+- MediaProjection 录屏、前台服务与相关权限。
+
+## [0.5.1] - 2026-11-25
+
+### Changed
+- 最低系统版本降到 Android 12（minSdk 31）：`LocaleManager` 走 13+ 分支，12/12L 用 `attachBaseContext` 包 Configuration。
+- 广播注册改用 `ContextCompat.registerReceiver`。
+- USB 权限 `PendingIntent` 改 `FLAG_MUTABLE`（系统要往里写 `EXTRA_PERMISSION_GRANTED`）。
+
+## [0.5.0] - 2026-11-25
+
+### Added
+- 截图（`Pictures/FelisLink`）、录屏（MediaProjection，0.5.2 起被内置录制取代）。
+- 投屏页截图 / 录制按钮，随 HUD 淡入淡出，受触控锁保护。
+
+## [0.4.0] - 2026-11-25
+
+### Added
+- 自愈：卡顿自动降级（`StutterMonitor` + 弹窗 / 不再提示）、断流自动重启、插卡自动开始。
+- 格式预设 7 档、触控锁定。
+- 手势：双指缩放 / 平移、双击复位、长按解锁。
+
+## [0.3.0] - 2026-11-25
+
+### Added
+- 采集策略引擎 `CaptureProfileAssessor`：按链路速率 / 芯片表 / 用户偏好选格式，带降级链。
+- 插卡一次性「采集卡配置」弹窗（含音频有无）。
+- 「高级采集」设置分区：帧率上限、压缩质量说明、自动降级开关、生效时机。
+
+## [0.2.0] - 2026-11-25
+
+### Added
+- 设置页（语言 / 旋转 / 分辨率 / 色彩格式 / HUD / 常亮 / 沉浸式）、中文本地化、HUD 总开关、
+  长按进设置、沉浸式全屏。
+
+## [0.1.0] - 2026-11-25
+
+### Added
+- 首个可安装 APK：改名 FelisLink（`com.felislink.app`），采集链路 + 上游三屏界面。
+
+---
+
+# 版本记录（简表）
+
+> 以下内容合并自原 `版本记录.md`，为各版本的一句话摘要。
+
+> 从 `FelisLink/README.md` 的「版本记录」段落拆分而来。README 中仅保留版本号索引（元数据），完整更新内容集中于此。
+
+## 版本记录
+
+| 版本 | 内容 |
+|---|---|
+| <a id="055"></a>0.5.5 | 修复「重置」在串流中按下时报「没有可用的采集格式」：旧实现只接受 `ConnectedUsbDevice`，串流时状态是 `StreamingUsbDeviceState`，直接返回失败。现在重置在任何已连接状态都可用——串流中按下会按当前设置重新评估格式、拆掉 native 管线并由状态机 `Stopped → Restart` 用新格式重开；失败提示也区分「卡未连接」和「卡没有可用格式」 |
+| <a id="054"></a>0.5.4 | 状态页显示实时 USB 链路版本（3.x/2.0/1.1）；帧率下拉列出全部上报帧率并降序去重、设置「帧率上限」加 120；「原始」填充改为等比例居中缩放（左右黑边对称，1:1 像素直出）；状态页内容包进 ScrollView，窄屏/横屏可滚动 |
+| <a id="053"></a>0.5.3 | 修复 0.5.2 启动即崩（清理 MediaProjection 时误删了 `StreamerViewModel` 的三参工厂，默认 `AndroidViewModelFactory` 只认 `(Application)` 构造而抛 `NoSuchMethodException`）；已恢复 `viewModelFactory { initializer { ... } }` |
+| <a id="052"></a>0.5.2 | 录制改为内置录制采集画面（MediaCodec + EGL 渲染到编码 Surface → `Movies/FelisLink`，不再用 MediaProjection 录手机屏幕，同步移除前台服务与录屏权限）；状态页「开始串流」旁新增「重置」（按当前设置重新评估并直接开流）；设置新增「画面填充」：原始/拉伸/裁切（TextureView 矩阵实现，立即可见）|
+| <a id="051"></a>0.5.1 | 最低系统降到 Android 12（minSdk 31）：`LocaleManager` 走 13+ 分支、12/12L 用 `LocaleSupport.wrap()`（attachBaseContext + Configuration）实现 per-app 语言；广播注册改 `ContextCompat.registerReceiver`；USB 权限 PendingIntent 改 `FLAG_MUTABLE`（系统要往里填 `EXTRA_PERMISSION_GRANTED`，immutable 在 12+ 会丢回调）|
+| <a id="050"></a>0.5.0 | 截图（`TextureView.getBitmap()` → 相册 `Pictures/FelisLink`）、录屏（MediaProjection 前台服务 → `Movies/FelisLink`，通知栏可停）、投屏页左上角截图/录屏按钮（随 HUD 淡入淡出、受触控锁保护）；「高级采集」补「音频输出跟随系统」说明行；版本记录 |
+| <a id="040"></a>0.4.0 | 自愈闭环：卡顿自动降级（`StutterMonitor`，含降级弹窗/不再提示）、断流自动重启、插卡自动开始、「高级采集」加格式预设 7 档 + 触控锁定；手势：双指缩放/平移、双击复位、长按解锁；旋屏文案改「自动（传感器）」；新增 5 个单元测试 |
+| <a id="030"></a>0.3.0 | 采集策略引擎：链路速率（读实际协商速率）/ 芯片表（仅显示）/ UVC 能力评估 / 格式回退链；插卡后一次性「采集卡配置」弹窗（含音频有无）；「高级采集」设置分区（帧率上限、压缩质量不可调说明、自动降级开关、生效时机）；`reconfigure()` 预留接口 |
+| <a id="020"></a>0.2.0 | 设置页（语言/旋转/分辨率/色彩格式/HUD/常亮/沉浸式）、中文本地化、HUD 总开关、长按进设置、沉浸式全屏 |
+| <a id="010"></a>0.1.0 | 基于 usb-video v2 编出的第一个可安装 APK：采集链路 + 原版三屏界面，改名 FelisLink |
+
+---
 
 ---
 
