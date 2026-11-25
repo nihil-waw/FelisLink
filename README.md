@@ -244,15 +244,17 @@ docs/DEVELOPMENT.md               开发过程记录（每轮的改动、踩坑�
 
 ## 版本记录
 
-| 版本 | 内容 |
-|---|---|
-| 0.5.5 | 修复「重置」在串流中按下时报「没有可用的采集格式」：旧实现只接受 `ConnectedUsbDevice`，串流时状态是 `StreamingUsbDeviceState`，直接返回失败。现在重置在任何已连接状态都可用——串流中按下会按当前设置重新评估格式、拆掉 native 管线并由状态机 `Stopped → Restart` 用新格式重开；失败提示也区分「卡未连接」和「卡没有可用格式」 |
-| 0.5.4 | 状态页显示实时 USB 链路版本（3.x/2.0/1.1）；帧率下拉列出全部上报帧率并降序去重、设置「帧率上限」加 120；「原始」填充改为等比例居中缩放（左右黑边对称，1:1 像素直出）；状态页内容包进 ScrollView，窄屏/横屏可滚动 |
-| 0.5.3 | 修复 0.5.2 启动即崩（清理 MediaProjection 时误删了 `StreamerViewModel` 的三参工厂，默认 `AndroidViewModelFactory` 只认 `(Application)` 构造而抛 `NoSuchMethodException`）；已恢复 `viewModelFactory { initializer { ... } }` |
-| 0.5.2 | 录制改为内置录制采集画面（MediaCodec + EGL 渲染到编码 Surface → `Movies/FelisLink`，不再用 MediaProjection 录手机屏幕，同步移除前台服务与录屏权限）；状态页「开始串流」旁新增「重置」（按当前设置重新评估并直接开流）；设置新增「画面填充」：原始/拉伸/裁切（TextureView 矩阵实现，立即可见）|
-| 0.5.1 | 最低系统降到 Android 12（minSdk 31）：`LocaleManager` 走 13+ 分支、12/12L 用 `LocaleSupport.wrap()`（attachBaseContext + Configuration）实现 per-app 语言；广播注册改 `ContextCompat.registerReceiver`；USB 权限 PendingIntent 改 `FLAG_MUTABLE`（系统要往里填 `EXTRA_PERMISSION_GRANTED`，immutable 在 12+ 会丢回调）|
-| 0.5.0 | 截图（`TextureView.getBitmap()` → 相册 `Pictures/FelisLink`）、录屏（MediaProjection 前台服务 → `Movies/FelisLink`，通知栏可停）、投屏页左上角截图/录屏按钮（随 HUD 淡入淡出、受触控锁保护）；「高级采集」补「音频输出跟随系统」说明行；版本记录 |
-| 0.4.0 | 自愈闭环：卡顿自动降级（`StutterMonitor`，含降级弹窗/不再提示）、断流自动重启、插卡自动开始、「高级采集」加格式预设 7 档 + 触控锁定；手势：双指缩放/平移、双击复位、长按解锁；旋屏文案改「自动（传感器）」；新增 5 个单元测试 |
-| 0.3.0 | 采集策略引擎：链路速率（读实际协商速率）/ 芯片表（仅显示）/ UVC 能力评估 / 格式回退链；插卡后一次性「采集卡配置」弹窗（含音频有无）；「高级采集」设置分区（帧率上限、压缩质量不可调说明、自动降级开关、生效时机）；`reconfigure()` 预留接口 |
-| 0.2.0 | 设置页（语言/旋转/分辨率/色彩格式/HUD/常亮/沉浸式）、中文本地化、HUD 总开关、长按进设置、沉浸式全屏 |
-| 0.1.0 | 基于 usb-video v2 编出的第一个可安装 APK：采集链路 + 原版三屏界面，改名 FelisLink |
+版本索引（仅元数据），完整更新内容见仓库根目录的 [`版本记录.md`](版本记录.md)。
+
+| 版本 | 发布日期 | 说明 |
+|---|---|---|
+| 0.5.5 | — | [详情](版本记录.md#055) |
+| 0.5.4 | — | [详情](版本记录.md#054) |
+| 0.5.3 | — | [详情](版本记录.md#053) |
+| 0.5.2 | — | [详情](版本记录.md#052) |
+| 0.5.1 | — | [详情](版本记录.md#051) |
+| 0.5.0 | — | [详情](版本记录.md#050) |
+| 0.4.0 | — | [详情](版本记录.md#040) |
+| 0.3.0 | — | [详情](版本记录.md#030) |
+| 0.2.0 | — | [详情](版本记录.md#020) |
+| 0.1.0 | — | [详情](版本记录.md#010) |
