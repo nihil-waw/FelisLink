@@ -38,6 +38,7 @@
   <string name="color_format_mjpeg">MJPEG</string>
   <string name="color_format_yuyv">YUYV</string>
   <string name="color_format_nv12">NV12</string>
+  <string name="color_format_hdr10">HDR / 10-bit (P010)</string>
 
   <string name="settings_hud">Stats overlay (HUD)</string>
   <string name="settings_hud_summary">Shows fps, format and timing over the video. Off means a clean picture.</string>
@@ -70,7 +71,7 @@
 
   <string name="capture_profile_dialog_title">Capture card profile</string>
   <string name="capture_profile_device">Device: %1$s</string>
-  <string name="capture_profile_chipset">Chipset: %1$s (label only)</string>
+  <string name="capture_profile_chipset">Chipset: %1$s</string>
   <string name="capture_profile_link_usb3">Link: USB 3.0</string>
   <string name="capture_profile_link_usb2">Link: USB 2.0 (480 Mbps)</string>
   <string name="capture_profile_link_unknown">Link: unknown, treating it as USB 2.0</string>
@@ -80,6 +81,7 @@
   <string name="capture_profile_reason_usb3">USB 3.0 link, so uncompressed formats are preferred to save CPU.</string>
   <string name="capture_profile_reason_usb2">USB 2.0 link, so we stay on compressed MJPEG to avoid dropped frames.</string>
   <string name="capture_profile_reason_user">Chosen from your pixel-format preference.</string>
+  <string name="capture_profile_reason_hdr10">10-bit P010 input selected; rendered through the 8-bit display pipeline.</string>
   <string name="capture_profile_fallbacks">Fallback if it stutters: %1$s</string>
   <string name="capture_profile_note">Compressed-image quality comes from the card firmware; libuvc has no compression control.</string>
   <string name="capture_profile_apply">Use this profile</string>

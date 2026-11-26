@@ -37,6 +37,7 @@
   <string name="color_format_mjpeg">MJPEG</string>
   <string name="color_format_yuyv">YUYV</string>
   <string name="color_format_nv12">NV12</string>
+  <string name="color_format_hdr10">HDR / 10 位（P010）</string>
 
   <string name="settings_hud">统计信息浮层（HUD）</string>
   <string name="settings_hud_summary">在画面上显示帧率、格式和耗时。关闭后画面更干净。</string>
@@ -69,7 +70,7 @@
 
   <string name="capture_profile_dialog_title">采集卡配置</string>
   <string name="capture_profile_device">设备：%1$s</string>
-  <string name="capture_profile_chipset">芯片：%1$s（仅用于显示）</string>
+  <string name="capture_profile_chipset">芯片：%1$s</string>
   <string name="capture_profile_link_usb3">链路：USB 3.0</string>
   <string name="capture_profile_link_usb2">链路：USB 2.0（480 Mbps）</string>
   <string name="capture_profile_link_unknown">链路：未知，按 USB 2.0 处理</string>
@@ -79,6 +80,7 @@
   <string name="capture_profile_reason_usb3">USB 3.0 链路，优先用低压缩格式，省 CPU。</string>
   <string name="capture_profile_reason_usb2">USB 2.0 链路，自动走 MJPEG 压缩格式，避免掉帧。</string>
   <string name="capture_profile_reason_user">按你设置的色彩格式偏好选择。</string>
+  <string name="capture_profile_reason_hdr10">已选择 10 位 P010 输入，经当前 8 位显示管线渲染。</string>
   <string name="capture_profile_fallbacks">卡顿时可降到：%1$s</string>
   <string name="capture_profile_note">压缩画质由采集卡固件决定，libuvc 没有压缩控制接口。</string>
   <string name="capture_profile_apply">用这套配置</string>

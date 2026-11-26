@@ -67,14 +67,22 @@ class VideoStatsSummary {
   var captureFrameWidth: Int = 0
   var captureFrameHeight: Int = 0
   var fps: Int = 0
+  var bitrateKbps: Int = 0
 
   @androidx.annotation.Keep
-  fun update(captureFrameFormat: Int, captureFrameWidth: Int, captureFrameHeight: Int, fps: Int) {
+  fun update(
+      captureFrameFormat: Int,
+      captureFrameWidth: Int,
+      captureFrameHeight: Int,
+      fps: Int,
+      bitrateKbps: Int,
+  ) {
     this.captureFrameFormat =
         if (captureFrameFormat < 0) null else LibuvcFrameFormat.values()[captureFrameFormat]
     this.captureFrameWidth = captureFrameWidth
     this.captureFrameHeight = captureFrameHeight
     this.fps = fps
+    this.bitrateKbps = bitrateKbps
   }
 
   fun isValid(): Boolean =

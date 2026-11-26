@@ -79,10 +79,13 @@ limitations under the License.
   <string name="video_fourcc_format_MJPG" description="The FOURCC code for the MJPG video format.">MJPG</string>
   <string name="video_fourcc_format_H264" description="The FOURCC code for the YUYV video format.">H264</string>
   <string name="video_fourcc_format_NV12" description="The FOURCC code for the NV12 video format.">NV12</string>
+  <string name="video_fourcc_format_P010" description="The FOURCC code for the 10-bit P010 video format.">P010 10-bit</string>
   <string name="video_format_unknown" description="Unknown video format.">Unknown</string>
 
   <string name="audio_streaming_short_summary_line" description="Short summary of audio streaming stats with {audio_format} {num_audio_channels} channels and {sampling_frequency}. Example: PMC16 2Ch. 48000"><xliff:g id="audio_format">%1$s</xliff:g> <xliff:g id="num_audio_channels">%2$d</xliff:g>Ch. <xliff:g id="sampling_frequency">%3$d</xliff:g></string>
-  <string name="video_streaming_short_summary_line" description="Short summary of video streaming stats with {fourcc_format} {width} {height} and {fps}. Example: YUYV 1980x1080 @60fps"><xliff:g id="fourcc_format">%1$s</xliff:g> <xliff:g id="width">%2$d</xliff:g>x<xliff:g id="height">%3$d</xliff:g> @<xliff:g id="fps">%4$d</xliff:g>fps</string>
+  <string name="video_streaming_short_summary_line" description="Short summary of video streaming stats with {fourcc_format} {width} {height} {fps} and {bitrate}. Example: YUYV 1980x1080 @60fps BR 12Mbps"><xliff:g id="fourcc_format">%1$s</xliff:g> <xliff:g id="width">%2$d</xliff:g>x<xliff:g id="height">%3$d</xliff:g> @<xliff:g id="fps">%4$d</xliff:g>fps <xliff:g id="bitrate">%5$s</xliff:g></string>
+  <string name="hud_bitrate_value" description="HUD bitrate abbreviation in English. BR means bitrate.">BR %1$.1fMbps</string>
+  <string name="hud_bitrate_unknown" description="HUD bitrate placeholder before the first measurement.">BR --</string>
   <string name="camera_icon_content_description" description="Accessibility label for the camera icon in the permissions checklist">Camera permission icon</string>
   <string name="camera_permissions_status_content_description" description="Accessibility label for the camera permissions status icon">Camera permission status</string>
   <string name="usb_device_permission_status_content_description" description="Accessibility label for the USB device permission status icon">USB device permission status</string>

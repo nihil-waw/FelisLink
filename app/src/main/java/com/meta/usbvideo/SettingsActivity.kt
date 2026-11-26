@@ -171,7 +171,13 @@ class SettingsActivity : ComponentActivity() {
     ) {
       showChoices(
           R.string.settings_color_format,
-          listOf(ColorFormatPref.AUTO, ColorFormatPref.MJPEG, ColorFormatPref.YUYV, ColorFormatPref.NV12),
+          listOf(
+            ColorFormatPref.AUTO,
+            ColorFormatPref.MJPEG,
+            ColorFormatPref.YUYV,
+            ColorFormatPref.NV12,
+            ColorFormatPref.HDR10,
+          ),
           ::colorFormatLabel,
           settings.colorFormat,
       ) { pref ->
@@ -418,6 +424,7 @@ class SettingsActivity : ComponentActivity() {
         ColorFormatPref.MJPEG -> getString(R.string.color_format_mjpeg)
         ColorFormatPref.YUYV -> getString(R.string.color_format_yuyv)
         ColorFormatPref.NV12 -> getString(R.string.color_format_nv12)
+        ColorFormatPref.HDR10 -> getString(R.string.color_format_hdr10)
       }
 
   private fun versionLabel(): String {

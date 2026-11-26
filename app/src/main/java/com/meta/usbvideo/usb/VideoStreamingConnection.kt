@@ -52,7 +52,7 @@ private const val UVC_VS_FORMAT_VP8: Int = 0x16
 private const val UVC_VS_FRAME_VP8: Int = 0x17
 private const val UVC_VS_FORMAT_VP8_SIMULCAST: Int = 0x18
 
-private val SUPPORTED_VIDEO_FOURCC_FORMATS: Array<String> = arrayOf("YUY2", "NV12", "MJPG")
+private val SUPPORTED_VIDEO_FOURCC_FORMATS: Array<String> = arrayOf("P010", "YUY2", "NV12", "MJPG")
 
 private fun aspectRatio(width: Int, height: Int): Pair<Int, Int> {
   val divisor = gcd(width, height)
@@ -509,6 +509,7 @@ data class VideoFormat(
       "YUY2" -> LibuvcFrameFormat.UVC_FRAME_FORMAT_YUYV
       "MJPG" -> LibuvcFrameFormat.UVC_FRAME_FORMAT_MJPEG
       "NV12" -> LibuvcFrameFormat.UVC_FRAME_FORMAT_NV12
+      "P010" -> LibuvcFrameFormat.UVC_FRAME_FORMAT_P010
       else -> throw IllegalArgumentException("Unsupported fourcc format $fourccFormat")
     }
   }

@@ -236,6 +236,7 @@ class StreamerActivity : ComponentActivity() {
               ProfileReason.PRESET_MATCHED -> R.string.capture_profile_reason_preset_matched
               ProfileReason.PRESET_FALLBACK -> R.string.capture_profile_reason_preset_fallback
               ProfileReason.NO_COMPRESSION_CONTROL -> R.string.capture_profile_reason_usb2
+              ProfileReason.HDR10_PREFERRED -> R.string.capture_profile_reason_hdr10
             }
         )
     profile.nextFallbackAfter(profile.preferred)?.let {

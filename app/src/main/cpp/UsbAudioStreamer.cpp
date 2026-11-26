@@ -19,6 +19,7 @@
 #include <aaudio/AAudio.h>
 #include <android/log.h>
 #include <libusb/libusb.h>
+#include <cstdio>
 
 #include <format>
 #include <memory>
@@ -409,9 +410,15 @@ std::string UsbAudioStreamer::statsSummaryString() const {
   } else if (jAudioFormat_ == 4) {
     audioFormatStr = "PCM Float";
   }
-  return std::format(
-      "{} {}Ch. {}", audioFormatStr, channelCount_, streamerStats_.samplingFrequency);
-  ;
+  char buffer[128];
+  snprintf(
+      buffer,
+      sizeof(buffer),
+      "%s %uCh. %u",
+      audioFormatStr.c_str(),
+      channelCount_,
+      streamerStats_.samplingFrequency);
+  return buffer;
 }
 
 AudioStatsSummary UsbAudioStreamer::statsSummary() const {

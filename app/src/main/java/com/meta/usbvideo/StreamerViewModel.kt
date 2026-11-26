@@ -568,15 +568,23 @@ class StreamerViewModel(
           LibuvcFrameFormat.UVC_FRAME_FORMAT_UYVY -> R.string.video_fourcc_format_UYVY
           LibuvcFrameFormat.UVC_FRAME_FORMAT_MJPEG -> R.string.video_fourcc_format_MJPG
           LibuvcFrameFormat.UVC_FRAME_FORMAT_NV12 -> R.string.video_fourcc_format_NV12
+          LibuvcFrameFormat.UVC_FRAME_FORMAT_P010 -> R.string.video_fourcc_format_P010
           else -> R.string.video_format_unknown
         }
 
+    val bitrateLabel =
+        if (bitrateKbps <= 0) {
+          application.getString(R.string.hud_bitrate_unknown)
+        } else {
+          application.getString(R.string.hud_bitrate_value, bitrateKbps / 1000f)
+        }
     return application.getString(
         R.string.video_streaming_short_summary_line,
         application.getString(videoFormatStringRes),
         captureFrameWidth,
         captureFrameHeight,
         fps,
+        bitrateLabel,
     )
   }
 

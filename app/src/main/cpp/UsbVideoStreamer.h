@@ -31,6 +31,7 @@ struct VideoStatsSummary {
   int32_t captureFrameWidth;
   int32_t captureFrameHeight;
   int32_t fps;
+  int32_t bitrateKbps;
 };
 
 struct UsbVideoStreamerStats {
@@ -41,6 +42,21 @@ struct UsbVideoStreamerStats {
   uint8_t fps = 0; // memoize value of current FPS when second rolls over
   uint8_t currentFps = 0;
   steady_clock::time_point t0{high_resolution_clock::now()};
+  steady_clock::time_point bitrateClock{high_resolution_clock::now()};
+  uint64_t bitrateBytes = 0;
+  int32_t bitrateKbps = 0;
+
+  void recordBytes(size_t bytes) {
+    bitrateBytes += bytes;
+    auto now = high_resolution_clock::now();
+    auto elapsed = duration_cast<milliseconds>(now - bitrateClock).count();
+    if (elapsed >= 1000) {
+      bitrateKbps =
+          static_cast<int32_t>((bitrateBytes * 8LL * 1000LL) / (elapsed * 1000LL));
+      bitrateBytes = 0;
+      bitrateClock = now;
+    }
+  }
 
   steady_clock::time_point captureRenderClock_{high_resolution_clock::now()};
   nanoseconds capture_{0ns};
@@ -100,6 +116,14 @@ class UsbVideoStreamer final {
   }
   [[nodiscard]] intptr_t getDeviceFD() const {
     return deviceFD_;
+  }
+  [[nodiscard]] int getUsbDeviceSpeed() const {
+    if (deviceHandle_ == nullptr) {
+      return LIBUSB_SPEED_UNKNOWN;
+    }
+    libusb_device_handle* handle = uvc_get_libusb_handle(deviceHandle_);
+    libusb_device* device = handle != nullptr ? libusb_get_device(handle) : nullptr;
+    return device != nullptr ? libusb_get_device_speed(device) : LIBUSB_SPEED_UNKNOWN;
   }
   std::string statsSummaryString() const;
   [[nodiscard]] VideoStatsSummary statsSummary() const;

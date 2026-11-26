@@ -72,10 +72,13 @@ limitations under the License.
   <string name="video_fourcc_format_MJPG">MJPG</string>
   <string name="video_fourcc_format_H264">H264</string>
   <string name="video_fourcc_format_NV12">NV12</string>
+  <string name="video_fourcc_format_P010">P010 10 位</string>
   <string name="video_format_unknown">未知</string>
 
   <string name="audio_streaming_short_summary_line"><xliff:g id="audio_format">%1$s</xliff:g> <xliff:g id="num_audio_channels">%2$d</xliff:g> 声道 <xliff:g id="sampling_frequency">%3$d</xliff:g></string>
-  <string name="video_streaming_short_summary_line"><xliff:g id="fourcc_format">%1$s</xliff:g> <xliff:g id="width">%2$d</xliff:g>×<xliff:g id="height">%3$d</xliff:g> @<xliff:g id="fps">%4$d</xliff:g>fps</string>
+  <string name="video_streaming_short_summary_line"><xliff:g id="fourcc_format">%1$s</xliff:g> <xliff:g id="width">%2$d</xliff:g>×<xliff:g id="height">%3$d</xliff:g> @<xliff:g id="fps">%4$d</xliff:g>fps <xliff:g id="bitrate">%5$s</xliff:g></string>
+  <string name="hud_bitrate_value">BR %1$.1fMbps</string>
+  <string name="hud_bitrate_unknown">BR --</string>
   <string name="camera_icon_content_description">相机权限图标</string>
   <string name="camera_permissions_status_content_description">相机权限状态</string>
   <string name="usb_device_permission_status_content_description">USB 设备权限状态</string>

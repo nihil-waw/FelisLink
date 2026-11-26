@@ -69,7 +69,14 @@ object ChipsetRegistry {
   private fun entryFor(device: UsbDevice?): Entry? =
       device?.let { d -> entries.firstOrNull { it.vendorId == d.vendorId && it.productId == d.productId } }
 
-  fun labelFor(device: UsbDevice?): String? = entryFor(device)?.label
+  /** Known chipset label, or a generic VID:PID label so every attached device is identifiable. */
+  fun labelFor(device: UsbDevice?): String? {
+    if (device == null) return null
+    return entryFor(device)?.label
+        ?: String.format("Unknown (%04X:%04X)", device.vendorId, device.productId)
+  }
+
+  fun isKnown(device: UsbDevice?): Boolean = entryFor(device) != null
 
   fun isUsb2Only(device: UsbDevice?): Boolean = entryFor(device)?.usb2Only ?: false
 }
@@ -88,6 +95,8 @@ enum class ProfileReason {
   PRESET_FALLBACK,
   /** `libuvc` exposes no UVC Compression Control, so the backend MJPEG quality is not tunable. */
   NO_COMPRESSION_CONTROL,
+  /** 10-bit P010 was available and selected for HDR-capable capture cards. */
+  HDR10_PREFERRED,
 }
 
 /**
@@ -127,8 +136,8 @@ data class CaptureProfile(
  * MJPEG and start at 30 fps because 1080p60 MJPEG already sits at the edge of the 480 Mbps budget.
  */
 object CaptureProfileAssessor {
-  private val FORMAT_PRIORITY_USB3 = listOf("YUY2", "MJPG", "NV12")
-  private val FORMAT_PRIORITY_USB2 = listOf("MJPG", "NV12", "YUY2")
+  private val FORMAT_PRIORITY_USB3 = listOf("P010", "YUY2", "MJPG", "NV12")
+  private val FORMAT_PRIORITY_USB2 = listOf("P010", "MJPG", "NV12", "YUY2")
 
   fun assess(
       connection: VideoStreamingConnection,
@@ -173,6 +182,8 @@ object CaptureProfileAssessor {
               } else {
                 ProfileReason.PRESET_FALLBACK
               }
+          chosen.fourccFormat.equals("P010", ignoreCase = true) ->
+              ProfileReason.HDR10_PREFERRED
           preferredFourcc != null && chosen.fourccFormat.equals(preferredFourcc, true) ->
               ProfileReason.USER_PREFERENCE
           link.isUsb3 && !chosen.fourccFormat.equals("MJPG", ignoreCase = true) ->

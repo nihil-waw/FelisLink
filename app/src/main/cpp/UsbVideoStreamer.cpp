@@ -34,7 +34,8 @@
 #include <libyuv/planar_functions.h>
 
 #include <chrono>
-#include <format>
+#include <cstdio>
+#include <string>
 
 #include <memory.h>
 #include <sys/prctl.h>
@@ -209,6 +210,8 @@ static std::string fourccFormatFromUvcFrameFormat(uvc_frame_format frameFormat) 
       return "H264";
     case UVC_FRAME_FORMAT_NV12:
       return "NV12";
+    case UVC_FRAME_FORMAT_P010:
+      return "P010/10-bit";
     default:
       return "";
   }
@@ -249,13 +252,17 @@ static bool isValidMjpegFrame(uvc_frame_t* frame) {
 }
 
 std::string UsbVideoStreamer::statsSummaryString() const {
-  return std::format(
-      "{} {}x{} @{} fps",
-      fourccFormatFromUvcFrameFormat(captureFrameFormat_),
+  char buffer[128];
+  snprintf(
+      buffer,
+      sizeof(buffer),
+      "%s %dx%d @%u fps BR %.1fMbps",
+      fourccFormatFromUvcFrameFormat(captureFrameFormat_).c_str(),
       captureFrameWidth_,
       captureFrameHeight_,
-      stats_.fps);
-  ;
+      stats_.fps,
+      stats_.bitrateKbps / 1000.0f);
+  return buffer;
 }
 
 VideoStatsSummary UsbVideoStreamer::statsSummary() const {
@@ -263,7 +270,8 @@ VideoStatsSummary UsbVideoStreamer::statsSummary() const {
       .captureFrameFormat = captureFrameFormat_,
       .captureFrameWidth = captureFrameWidth_,
       .captureFrameHeight = captureFrameHeight_,
-      .fps = stats_.fps};
+      .fps = stats_.fps,
+      .bitrateKbps = stats_.bitrateKbps};
 }
 
 UsbVideoStreamer::~UsbVideoStreamer() {
@@ -299,6 +307,22 @@ void UsbVideoStreamer::captureFrameCallback(uvc_frame_t* frame, void* user_data)
         return;
       }
       break;
+    case UVC_FRAME_FORMAT_P010: {
+      // P010 is YUV420 10-bit stored in 16-bit little-endian words (2 bytes per sample).
+      const size_t p010LumaStride = static_cast<size_t>(frame->width) * 2;
+      const size_t p010MinSize = p010LumaStride * frame->height * 3 / 2;
+      if (frame->data_bytes < p010MinSize) {
+        ULOGE(
+            "Invalid P010 frame size %zu vs expected %zu for %dx%d, step %zu frame",
+            frame->data_bytes,
+            p010MinSize,
+            frame->width,
+            frame->height,
+            frame->step);
+        return;
+      }
+      break;
+    }
     case UVC_FRAME_FORMAT_YUYV:
       expectedSize = frame->width * frame->height * 2;
       if (frame->data_bytes != expectedSize) {
@@ -358,7 +382,35 @@ void UsbVideoStreamer::captureFrameCallback(uvc_frame_t* frame, void* user_data)
         buffer.height);
   }
 
-  if (frame->frame_format == UVC_FRAME_FORMAT_NV12) {
+  if (frame->frame_format == UVC_FRAME_FORMAT_P010) {
+    // P010 is 10-bit YUV420. libyuv converts it straight into the 8-bit RGB surface we use today;
+    // HDR metadata is not propagated to the display, but 10-bit UVC sources are usable.
+    const int p010Stride = frame->width; // uint16 samples per row
+    const uint16_t* p010Y = reinterpret_cast<const uint16_t*>(frame->data);
+    const uint16_t* p010UV = p010Y + p010Stride * frame->height;
+    int32_t hardware_buffer_format = buffer.format;
+    if (hardware_buffer_format == AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM) {
+      libyuv::P010ToARGBMatrix(
+          p010Y,
+          p010Stride,
+          p010UV,
+          p010Stride,
+          reinterpret_cast<uint8_t*>(buffer.bits),
+          buffer.stride * 4,
+          &libyuv::kYuvH709Constants,
+          frame->width,
+          frame->height);
+      libyuv::ABGRToARGB(
+          reinterpret_cast<uint8_t*>(buffer.bits),
+          4 * buffer.stride,
+          reinterpret_cast<uint8_t*>(buffer.bits),
+          4 * buffer.stride,
+          buffer.width,
+          buffer.height);
+    } else {
+      ULOGE("Unsupported hardware format for UVC_FRAME_FORMAT_P010 %d", hardware_buffer_format);
+    }
+  } else if (frame->frame_format == UVC_FRAME_FORMAT_NV12) {
     int32_t hardware_buffer_format = buffer.format;
     if (hardware_buffer_format == AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM) {
       uint8_t* src_y = (uint8_t*)frame->data;
@@ -448,6 +500,7 @@ void UsbVideoStreamer::captureFrameCallback(uvc_frame_t* frame, void* user_data)
   ANativeWindow_unlockAndPost(preview_window);
 
   stats.recordRender();
+  stats.recordBytes(frame->data_bytes);
   stats.recordFrame();
   stats.frames++;
   auto frame_count = stats.frames;

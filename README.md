@@ -26,11 +26,11 @@ FelisLink 基于 Meta 开源的 [facebookexperimental/usb-video](https://github.
 
 ## 当前状态
 
-版本 **0.5.5**（versionCode 10，应用名 `FelisLink`，包名 `com.felislink.app`）。
+版本 **0.5.6**（versionCode 11，应用名 `FelisLink`，包名 `com.felislink.app`）。
 
 已实现的东西（也就是这套代码当前的全部能力）：
 
-- **采集**：UVC 直出，YUYV / MJPEG / NV12，1080p60；链路上限（USB 2.0 / 3.0）由描述符与实测带宽共同决定
+- **采集**：UVC 直出，P010 10-bit / YUYV / MJPEG / NV12，1080p60；链路上限（USB 2.0 / 3.0）由描述符与实测带宽共同决定
 - **界面**：引导 → 状态 → 投屏三屏 + 设置页；状态页可滚动，窄屏/横屏都不截断
 - **策略引擎**：按实际协商的 USB 速率 + 芯片表 + 用户偏好自动挑格式，给出降级链
 - **自愈**：卡顿自动降一档（含弹窗与「不再提示」）、断流自动重启、插卡自动开始
@@ -38,7 +38,7 @@ FelisLink 基于 Meta 开源的 [facebookexperimental/usb-video](https://github.
 - **产出**：截图（`Pictures/FelisLink`）、内置录制采集画面（`Movies/FelisLink`，无声音）
 - **系统**：Android 12+（minSdk 31）、arm64-v8a、中文 / English、per-app 语言
 
-还没做：签名 release（目前只有 debug 签名）、arm64 以外的 ABI、HDR / 10bit 输入、亮度调节。
+还没做：签名 release（目前只有 debug 签名）、arm64 以外的 ABI、亮度调节。HDR / 10-bit（P010）输入已可用，但显示仍经当前 8 位管线，不输出 HDR metadata。
 
 状态页有三个下拉（色彩格式 / 分辨率 / 帧率），可以从采集卡真实上报的格式里临时切换——只列出设备支持的组合，不会选到黑屏。
 
@@ -219,6 +219,9 @@ docs/DEVELOPMENT.md               开发过程记录（每轮的改动、踩坑�
 | M3 | 一键截图（`TextureView.getBitmap()`，存 `Pictures/FelisLink`）| ✅ 0.5.0 |
 | M3 | 画中画 PiP（悬浮在其他 App 上，进 PiP 自动关 HUD）| 规划 |
 | P2 | 低延迟 / 流畅两档缓冲策略 | 规划 |
+| M3 | HDR / 10-bit 输入（UVC P010）| ✅ 可用（经 8 位显示管线）|
+| P2 | 真 HDR 显示（HDR surface + metadata）| 待开发 |
+| P2 | 未知采集卡硬件识别（VID/PID 标签 + 能力探测）| 待开发 |
 | M3 | 内置录制：录采集画面（MediaCodec+EGL，无 HUD）| ✅ 0.5.2（画面，无声音）|
 | M3 | 画面填充：原始 / 拉伸 / 裁切 | ✅ 0.5.2 |
 | M3 | 状态页「重置」：按当前设置重新评估并串流 | ✅ 0.5.2 |
@@ -248,6 +251,7 @@ docs/DEVELOPMENT.md               开发过程记录（每轮的改动、踩坑�
 
 | 版本 | 发布日期 | 说明 |
 |---|---|---|
+| 0.5.6 | 2026-11-26 | [详情](docs/DEVELOPMENT.md) |
 | 0.5.5 | 2026-11-25 | [详情](docs/DEVELOPMENT.md) |
 | 0.5.4 | 2026-11-25 | [详情](docs/DEVELOPMENT.md) |
 | 0.5.3 | 2026-11-25 | [详情](docs/DEVELOPMENT.md) |

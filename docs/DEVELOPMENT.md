@@ -16,6 +16,21 @@
 [facebookexperimental/usb-video](https://github.com/facebookexperimental/usb-video) 的提交记录。
 格式参考 [Keep a Changelog](https://keepachangelog.com/)，版本号沿用 `0.x.y`。
 
+## [Unreleased]
+
+### Added
+- UVC P010 10-bit 输入：Kotlin 格式白名单 / 设置项 / 策略优先级与 native 渲染均已接通；P010 通过 libyuv 转换为当前 RGB surface（8-bit 管线，不输出 HDR metadata）。
+- USB 链路检测覆盖 video-only 采集卡：native `getUsbDeviceSpeed()` 会同时查询音频与视频 streamer。
+- 未知采集卡识别：芯片表未命中时显示 `Unknown (VID:PID)`，不再只识别已知芯片。
+- HUD 实时码率：native 按秒统计输入字节数，以 `BR <mbps>Mbps` 英文缩写显示。
+- 重建 `arm64-v8a` native 库：NDK r26c / Android 33 / Release，产物已 strip 并更新到 `jniLibs`。
+
+## [0.5.6] - 2026-11-26
+
+### Changed
+- HUD 实时码率从 Kbps 改为 Mbps，保留一位小数显示（例如 `BR 18.4Mbps`）。
+- 按每次构建 APK 的更新规则升级版本号到 0.5.6 / versionCode 11，并重建发布包。
+
 ## [0.5.5] - 2026-11-25
 
 ### Fixed
@@ -101,6 +116,8 @@
 
 | 版本 | 内容 |
 |---|---|
+| <a id="unreleased"></a>Unreleased | HDR / 10-bit（P010）输入可用；USB 链路检测覆盖 video-only 卡；未知采集卡显示 VID:PID 标签；HUD 码率按 Mbps 显示 |
+| <a id="056"></a>0.5.6 | HUD 码率改为 Mbps；版本号随 APK 构建升级到 0.5.6 / versionCode 11 |
 | <a id="055"></a>0.5.5 | 修复「重置」在串流中按下时报「没有可用的采集格式」：旧实现只接受 `ConnectedUsbDevice`，串流时状态是 `StreamingUsbDeviceState`，直接返回失败。现在重置在任何已连接状态都可用——串流中按下会按当前设置重新评估格式、拆掉 native 管线并由状态机 `Stopped → Restart` 用新格式重开；失败提示也区分「卡未连接」和「卡没有可用格式」 |
 | <a id="054"></a>0.5.4 | 状态页显示实时 USB 链路版本（3.x/2.0/1.1）；帧率下拉列出全部上报帧率并降序去重、设置「帧率上限」加 120；「原始」填充改为等比例居中缩放（左右黑边对称，1:1 像素直出）；状态页内容包进 ScrollView，窄屏/横屏可滚动 |
 | <a id="053"></a>0.5.3 | 修复 0.5.2 启动即崩（清理 MediaProjection 时误删了 `StreamerViewModel` 的三参工厂，默认 `AndroidViewModelFactory` 只认 `(Application)` 构造而抛 `NoSuchMethodException`）；已恢复 `viewModelFactory { initializer { ... } }` |

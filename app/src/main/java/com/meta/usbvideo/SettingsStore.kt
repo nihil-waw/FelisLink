@@ -91,7 +91,8 @@ enum class ColorFormatPref(val fourcc: String?) {
   AUTO(null),
   MJPEG("MJPG"),
   YUYV("YUY2"),
-  NV12("NV12");
+  NV12("NV12"),
+  HDR10("P010");
 
   companion object {
     fun fromName(name: String?): ColorFormatPref = entries.firstOrNull { it.name == name } ?: AUTO

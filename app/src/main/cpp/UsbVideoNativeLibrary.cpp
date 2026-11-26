@@ -49,7 +49,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* jvm, void* reserved) {
   }
   jclass videoStatsSummaryClass = env->FindClass("com/meta/usbvideo/VideoStatsSummary");
   if (videoStatsSummaryClass != nullptr) {
-    updateVideotatsMethodID = env->GetMethodID(videoStatsSummaryClass, "update", "(IIII)V");
+    updateVideotatsMethodID = env->GetMethodID(videoStatsSummaryClass, "update", "(IIIII)V");
   }
   CLOGI("JNI_OnLoad success!");
   return JNI_VERSION_1_4;
@@ -65,10 +65,14 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM* jvm, void* reserved) {
 
 JNIEXPORT jint JNICALL
 Java_com_meta_usbvideo_UsbVideoNativeLibrary_getUsbDeviceSpeed(JNIEnv* env, jobject self) {
+  int speed = LIBUSB_SPEED_UNKNOWN;
   if (streamer_ != nullptr) {
-    return streamer_->getUsbDeviceSpeed();
+    speed = streamer_->getUsbDeviceSpeed();
   }
-  return 0; /* LIBUSB_SPEED_UNKNOWN */
+  if (speed == LIBUSB_SPEED_UNKNOWN && uvcStreamer_ != nullptr) {
+    speed = uvcStreamer_->getUsbDeviceSpeed();
+  }
+  return speed;
 }
 
 JNIEXPORT jint JNICALL Java_com_meta_usbvideo_UsbVideoNativeLibrary_connectUsbVideoStreamingNative(
@@ -163,9 +167,10 @@ JNIEXPORT void JNICALL Java_com_meta_usbvideo_UsbVideoNativeLibrary_updateStream
           stats.captureFrameFormat,
           stats.captureFrameWidth,
           stats.captureFrameHeight,
-          stats.fps);
+          stats.fps,
+          stats.bitrateKbps);
     } else {
-      env->CallVoidMethod(videoStatsSummary, updateVideotatsMethodID, -1, -1, -1, -1);
+      env->CallVoidMethod(videoStatsSummary, updateVideotatsMethodID, -1, -1, -1, -1, -1);
     }
   }
 }
