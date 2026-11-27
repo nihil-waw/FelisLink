@@ -75,6 +75,7 @@ class StreamerActivity : ComponentActivity() {
   private lateinit var settings: SettingsStore
   private var appliedSettingsRevision = 0
   private var recreatedForLocale = false
+  private var appliedTheme = ThemePref.DARK
   /** Device whose capability dialog was already shown, so reconnect does not nag every second. */
   private var lastProfileDialogKey: String? = null
   /** Device key that already auto-started, so a re-emitted state cannot start twice. */
@@ -99,11 +100,13 @@ class StreamerActivity : ComponentActivity() {
 
   override fun attachBaseContext(newBase: android.content.Context) {
     super.attachBaseContext(LocaleSupport.wrap(newBase))
+    ThemeHelper.apply(this)
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     settings = SettingsStore.get(this)
+    appliedTheme = settings.theme
     lastProfileDialogKey = savedInstanceState?.getString(STATE_PROFILE_DIALOG_KEY)
     appliedSettingsRevision = SettingsStore.revision
     applyRotation()
@@ -355,6 +358,10 @@ class StreamerActivity : ComponentActivity() {
     if (SettingsStore.revision != appliedSettingsRevision) {
       appliedSettingsRevision = SettingsStore.revision
       streamerViewModel.refreshFormatSelectionFromSettings()
+    }
+    if (settings.theme != appliedTheme) {
+      recreate()
+      return
     }
     maybeRecreateForLocale()
     updateSettingsButtonVisibility()

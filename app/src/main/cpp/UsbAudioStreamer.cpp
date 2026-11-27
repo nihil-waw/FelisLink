@@ -20,6 +20,7 @@
 #include <android/log.h>
 #include <libusb/libusb.h>
 #include <cstdio>
+#include <jni.h>
 
 #include <format>
 #include <memory>
@@ -33,6 +34,25 @@
 #define ULOGW(...) __android_log_print(ANDROID_LOG_WARN, "UsbAudioStreamer", __VA_ARGS__)
 
 #define ULOGE(...) __android_log_print(ANDROID_LOG_ERROR, "UsbAudioStreamer", __VA_ARGS__)
+
+void UsbAudioStreamer::setRecordingSink(std::function<void(const uint8_t*, size_t)> sink) {
+  std::lock_guard<std::mutex> lock(recordingMutex_);
+  recordingSink_ = std::move(sink);
+}
+
+void UsbAudioStreamer::emitRecordingData(const void* data, size_t bytes) {
+  if (data == nullptr || bytes == 0) {
+    return;
+  }
+  std::function<void(const uint8_t*, size_t)> sink;
+  {
+    std::lock_guard<std::mutex> lock(recordingMutex_);
+    sink = recordingSink_;
+  }
+  if (sink) {
+    sink(static_cast<const uint8_t*>(data), bytes);
+  }
+}
 
 UsbAudioStreamer::~UsbAudioStreamer() {
   if (audioStream_ != nullptr) {
@@ -458,6 +478,7 @@ aaudio_data_callback_result_t UsbAudioStreamer::audioPlaybackCallback(
           movedData);
     }
   }
+  streamer->emitRecordingData(audioData, bytesToRead);
   return AAUDIO_CALLBACK_RESULT_CONTINUE;
 }
 

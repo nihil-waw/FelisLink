@@ -20,6 +20,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.media.MediaCodec
 import android.media.MediaCodecInfo
+import android.media.AudioFormat
 import android.media.MediaFormat
 import android.media.MediaMuxer
 import android.net.Uri
@@ -52,8 +53,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  * at the recording frame rate and feeds it through a `MediaCodec` input surface (EGL) into an H.264
  * MP4 written to `Movies/FelisLink`. No MediaProjection, no status bar, no other apps, no HUD.
  *
- * Everything here is video-only: the UAC playback happens in the native AAudio path and is not
- * captured (that would need an audio capture policy change on the native side).
+ * Audio, when available, is the UAC PCM that is also being played through AAudio; it is enabled
+ * only while FelisLink is shown on a non-default display. Video is always recorded.
  */
 object CaptureVideoRecorder {
   private const val TAG = "CaptureVideoRecorder"
@@ -61,9 +62,12 @@ object CaptureVideoRecorder {
   private const val FPS_CAP = 30
   private const val MAX_EDGE = 1920
   private const val I_FRAME_INTERVAL_SECONDS = 2
+  private const val AUDIO_BIT_RATE = 128_000
+  private const val PCM_QUEUE_CAPACITY_BYTES = 262_144
 
   @Volatile private var session: Session? = null
   private val starting = AtomicBoolean(false)
+  @Volatile private var audioEnabled = false
 
   /** Set when a recording died on its own (encoder error, storage error). */
   @Volatile var lastError: Throwable? = null
@@ -82,7 +86,13 @@ object CaptureVideoRecorder {
    * @param sourceWidth/sourceHeight view size of the picture being recorded.
    * @param sourceFps negotiated capture fps (clamped to [FPS_CAP]).
    */
-  fun start(context: Context, sourceWidth: Int, sourceHeight: Int, sourceFps: Int): Boolean {
+  fun start(
+    context: Context,
+    sourceWidth: Int,
+    sourceHeight: Int,
+    sourceFps: Int,
+    enableAudio: Boolean,
+  ): Boolean {
     lastError = null
     if (session != null || !starting.compareAndSet(false, true)) {
       return false
@@ -90,7 +100,9 @@ object CaptureVideoRecorder {
     return try {
       val (width, height) = fitSize(sourceWidth, sourceHeight)
       val fps = sourceFps.coerceIn(1, FPS_CAP)
-      val candidate = Session(context.applicationContext, width, height, fps, ::onSessionFailed)
+      audioEnabled = enableAudio
+      val candidate =
+          Session(context.applicationContext, width, height, fps, enableAudio, ::onSessionFailed)
       if (!candidate.start()) {
         candidate.abandon()
         return false
@@ -117,9 +129,18 @@ object CaptureVideoRecorder {
     return current.submit(bitmap)
   }
 
+  /** Called from native UAC playback callback on the AAudio thread. */
+  fun onPcmData(data: ByteArray, androidAudioFormat: Int, channelCount: Int, sampleRate: Int) {
+    if (!audioEnabled) {
+      return
+    }
+    session?.submitPcm(data, androidAudioFormat, channelCount, sampleRate)
+  }
+
   fun stop() {
     val current = session ?: return
     session = null
+    audioEnabled = false
     RecordingState.setRunning(false)
     current.stop()
   }
@@ -148,6 +169,7 @@ object CaptureVideoRecorder {
       private val width: Int,
       private val height: Int,
       private val fps: Int,
+      private val recordAudio: Boolean,
       private val onFailed: (Throwable) -> Unit,
   ) {
     private val thread = HandlerThread("felislink-recorder").apply { start() }
@@ -155,6 +177,14 @@ object CaptureVideoRecorder {
     private val ready = CountDownLatch(1)
     private val frameInFlight = AtomicBoolean(false)
     private val bufferInfo = MediaCodec.BufferInfo()
+    private val audioBufferInfo = MediaCodec.BufferInfo()
+    private val pcmQueue = java.util.concurrent.LinkedBlockingQueue<ByteArray>()
+    private var audioSourceFormat = AudioFormat.ENCODING_PCM_16BIT
+    private var audioChannelCount = 2
+    private var audioSampleRate = 48_000
+    private var audioCodec: MediaCodec? = null
+    private var audioTrackIndex = -1
+    private var audioPtsUs = 0L
 
     @Volatile private var setupError: Throwable? = null
     @Volatile private var closed = false
@@ -232,7 +262,155 @@ object CaptureVideoRecorder {
           )
       encoder.start()
       setupEgl(surface)
-      Log.i(TAG, "Recording $width x $height @${fps}fps")
+      if (recordAudio) {
+        ensureAudioEncoder()
+      }
+      Log.i(TAG, "Recording " + width + " x " + height + " @" + fps + "fps, audio=" + recordAudio)
+    }
+
+    private fun ensureAudioEncoder() {
+      if (audioCodec != null) {
+        return
+      }
+      val format =
+          MediaFormat.createAudioFormat(
+              MediaFormat.MIMETYPE_AUDIO_AAC,
+              audioSampleRate,
+              audioChannelCount,
+          )
+      format.setInteger(MediaFormat.KEY_BIT_RATE, AUDIO_BIT_RATE)
+      format.setInteger(
+          MediaFormat.KEY_AAC_PROFILE,
+          MediaCodecInfo.CodecProfileLevel.AACObjectLC,
+      )
+      val encoder = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC)
+      encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
+      encoder.start()
+      audioCodec = encoder
+      // The output format is only known after configure; add the track here so the muxer
+      // accepts audio samples even before the first AAC buffer is drained.
+      val mux = muxer ?: return
+      audioTrackIndex = mux.addTrack(encoder.outputFormat)
+      if (trackIndex >= 0 && !muxerStarted) {
+        mux.start()
+        muxerStarted = true
+      }
+    }
+
+    fun submitPcm(data: ByteArray, androidAudioFormat: Int, channels: Int, sampleRate: Int) {
+      if (!recordAudio || closed) {
+        return
+      }
+      audioSourceFormat = androidAudioFormat
+      audioChannelCount = channels.coerceIn(1, 2)
+      audioSampleRate = sampleRate.coerceIn(8_000, 192_000)
+      try {
+        ensureAudioEncoder()
+      } catch (t: Throwable) {
+        fail(t)
+        return
+      }
+      if (pcmQueue.size >= PCM_QUEUE_CAPACITY_BYTES / data.size.coerceAtLeast(1)) {
+        pcmQueue.poll()
+      }
+      pcmQueue.offer(data.copyOf())
+      handler.post { drainAudio(endOfStream = false) }
+    }
+
+    private fun drainAudio(endOfStream: Boolean) {
+      val encoder = audioCodec ?: return
+      val chunk = pcmQueue.poll() ?: run {
+        if (endOfStream) {
+          try {
+            encoder.signalEndOfInputStream()
+          } catch (t: Throwable) {
+            Log.w(TAG, "AAC EOS failed", t)
+          }
+        }
+        drainAudioOutput(encoder)
+        return
+      }
+      val pcm = convertPcm(chunk, audioSourceFormat, audioChannelCount)
+      val inputIndex = encoder.dequeueInputBuffer(0)
+      if (inputIndex < 0) {
+        pcmQueue.offer(chunk)
+        drainAudioOutput(encoder)
+        return
+      }
+      val input = encoder.getInputBuffer(inputIndex) ?: run {
+        encoder.queueInputBuffer(inputIndex, 0, 0, 0, 0)
+        drainAudioOutput(encoder)
+        return
+      }
+      if (input.remaining() < pcm.size) {
+        drainAudioOutput(encoder)
+        return
+      }
+      input.put(pcm)
+      encoder.queueInputBuffer(inputIndex, 0, pcm.size, audioPtsUs, 0)
+      audioPtsUs += (pcm.size / 2L / audioChannelCount.coerceAtLeast(1)) * 1_000_000L / audioSampleRate
+      drainAudioOutput(encoder)
+    }
+
+    private fun convertPcm(data: ByteArray, audioFormat: Int, channels: Int): ByteArray {
+      return when (audioFormat) {
+        AudioFormat.ENCODING_PCM_16BIT -> data
+        AudioFormat.ENCODING_PCM_8BIT -> {
+          val out = ByteArray(data.size * 2)
+          for (i in data.indices) {
+            val sample = (data[i].toInt() - 128) shl 8
+            out[i * 2] = (sample and 0xff).toByte()
+            out[i * 2 + 1] = (sample shr 8).toByte()
+          }
+          out
+        }
+        AudioFormat.ENCODING_PCM_FLOAT -> {
+          val source = ByteBuffer.wrap(data).order(ByteOrder.nativeOrder()).asFloatBuffer()
+          val out = ByteArray(source.remaining() * 2)
+          for (i in 0 until source.remaining()) {
+            val value = source.get().coerceIn(-1f, 1f)
+            val pcm = (value * 32767).toInt()
+            out[i * 2] = (pcm and 0xff).toByte()
+            out[i * 2 + 1] = (pcm shr 8).toByte()
+          }
+          out
+        }
+        else -> data
+      }
+    }
+
+    private fun drainAudioOutput(encoder: MediaCodec) {
+      while (true) {
+        val index = encoder.dequeueOutputBuffer(audioBufferInfo, 0)
+        when {
+          index == MediaCodec.INFO_TRY_AGAIN_LATER -> return
+          index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> {
+            val mux = muxer ?: return
+            if (audioTrackIndex < 0) {
+              audioTrackIndex = mux.addTrack(encoder.outputFormat)
+            }
+            if (trackIndex >= 0 && !muxerStarted) {
+              mux.start()
+              muxerStarted = true
+            }
+          }
+          index >= 0 -> {
+            val buffer = encoder.getOutputBuffer(index) ?: continue
+            if (audioBufferInfo.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG != 0) {
+              audioBufferInfo.size = 0
+            }
+            if (audioBufferInfo.size > 0 && muxerStarted && audioTrackIndex >= 0) {
+              buffer.position(audioBufferInfo.offset)
+              buffer.limit(audioBufferInfo.offset + audioBufferInfo.size)
+              muxer?.writeSampleData(audioTrackIndex, buffer, audioBufferInfo)
+            }
+            encoder.releaseOutputBuffer(index, false)
+            if (audioBufferInfo.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0) {
+              return
+            }
+          }
+        }
+      }
     }
 
     fun submit(bitmap: Bitmap): Boolean {
@@ -411,8 +589,10 @@ object CaptureVideoRecorder {
           index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> {
             val mux = muxer ?: return
             trackIndex = mux.addTrack(encoder.outputFormat)
-            mux.start()
-            muxerStarted = true
+            if (trackIndex >= 0 && !muxerStarted) {
+              mux.start()
+              muxerStarted = true
+            }
           }
           index >= 0 -> {
             val buffer: ByteBuffer = encoder.getOutputBuffer(index) ?: continue
@@ -442,6 +622,7 @@ object CaptureVideoRecorder {
           }
           encoder.signalEndOfInputStream()
           drain(endOfStream = true)
+          audioCodec?.let { drainAudio(endOfStream = true) }
         } catch (t: Throwable) {
           Log.w(TAG, "Encoder flush failed", t)
         }
@@ -462,6 +643,17 @@ object CaptureVideoRecorder {
         Log.w(TAG, "codec.release failed", t)
       }
       codec = null
+      try {
+        audioCodec?.stop()
+      } catch (t: Throwable) {
+        Log.w(TAG, "audioCodec.stop failed", t)
+      }
+      try {
+        audioCodec?.release()
+      } catch (t: Throwable) {
+        Log.w(TAG, "audioCodec.release failed", t)
+      }
+      audioCodec = null
       if (eglDisplay != EGL14.EGL_NO_DISPLAY) {
         EGL14.eglMakeCurrent(
             eglDisplay,

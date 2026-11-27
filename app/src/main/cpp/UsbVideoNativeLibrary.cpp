@@ -18,6 +18,7 @@
 #include <android/native_window_jni.h>
 #include <jni.h>
 #include <memory.h>
+#include <climits>
 #include <string>
 
 #include "UsbAudioStreamer.h"
@@ -27,6 +28,8 @@
 static JavaVM* javaVM_ = nullptr;
 static jmethodID updateAudioStatsMethodID = nullptr;
 static jmethodID updateVideotatsMethodID = nullptr;
+static jmethodID onPcmDataMethodID = nullptr;
+static jclass nativeLibraryClass = nullptr;
 
 static std::unique_ptr<UsbAudioStreamer> streamer_{};
 static std::unique_ptr<UsbVideoStreamer> uvcStreamer_{};
@@ -51,6 +54,12 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* jvm, void* reserved) {
   if (videoStatsSummaryClass != nullptr) {
     updateVideotatsMethodID = env->GetMethodID(videoStatsSummaryClass, "update", "(IIIII)V");
   }
+  jclass localNativeLibraryClass = env->FindClass("com/meta/usbvideo/UsbVideoNativeLibrary");
+  if (localNativeLibraryClass != nullptr) {
+    onPcmDataMethodID = env->GetStaticMethodID(localNativeLibraryClass, "onPcmData", "([BIII)V");
+    nativeLibraryClass = static_cast<jclass>(env->NewGlobalRef(localNativeLibraryClass));
+    env->DeleteLocalRef(localNativeLibraryClass);
+  }
   CLOGI("JNI_OnLoad success!");
   return JNI_VERSION_1_4;
 }
@@ -60,6 +69,13 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM* jvm, void* reserved) {
     jvm->DestroyJavaVM();
   }
   javaVM_ = nullptr;
+  if (nativeLibraryClass != nullptr) {
+    JNIEnv* env = nullptr;
+    if (jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_4) == JNI_OK) {
+      env->DeleteGlobalRef(nativeLibraryClass);
+    }
+    nativeLibraryClass = nullptr;
+  }
   CLOGI("JNI_OnUnload success!");
 }
 
@@ -205,6 +221,7 @@ Java_com_meta_usbvideo_UsbVideoNativeLibrary_disconnectUsbAudioStreamingNative(
     JNIEnv* env,
     jobject self) {
   if (streamer_ != nullptr) {
+    streamer_->setRecordingSink(nullptr);
     streamer_ = nullptr;
   }
 }
@@ -216,12 +233,60 @@ JNIEXPORT void JNICALL Java_com_meta_usbvideo_UsbVideoNativeLibrary_startUsbAudi
   }
 }
 
+JNIEXPORT jboolean JNICALL
+Java_com_meta_usbvideo_UsbVideoNativeLibrary_isUsbAudioStreamingActiveNative(JNIEnv* env, jobject self) {
+  return streamer_ != nullptr && streamer_->isPlaying() ? JNI_TRUE : JNI_FALSE;
+}
+
 JNIEXPORT void JNICALL Java_com_meta_usbvideo_UsbVideoNativeLibrary_stopUsbAudioStreamingNative(
     JNIEnv* env,
     jobject self) {
   if (streamer_ != nullptr) {
     streamer_->stop();
   }
+}
+
+JNIEXPORT void JNICALL
+Java_com_meta_usbvideo_UsbVideoNativeLibrary_setAudioRecordingEnabledNative(
+    JNIEnv* env,
+    jobject self,
+    jboolean enabled) {
+  if (streamer_ == nullptr) {
+    return;
+  }
+  if (!enabled) {
+    streamer_->setRecordingSink(nullptr);
+    return;
+  }
+  streamer_->setRecordingSink([](const uint8_t* data, size_t bytes) {
+    if (data == nullptr || bytes <= 0 || bytes > INT32_MAX || javaVM_ == nullptr ||
+        onPcmDataMethodID == nullptr) {
+      return;
+    }
+    JNIEnv* env = nullptr;
+    bool attached = false;
+    if (javaVM_->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_4) != JNI_OK) {
+      if (javaVM_->AttachCurrentThread(&env, nullptr) != JNI_OK) {
+        return;
+      }
+      attached = true;
+    }
+    jbyteArray array = env->NewByteArray(static_cast<jsize>(bytes));
+    if (array != nullptr) {
+      env->SetByteArrayRegion(array, 0, static_cast<jsize>(bytes), reinterpret_cast<const jbyte*>(data));
+      env->CallStaticVoidMethod(
+          nativeLibraryClass,
+          onPcmDataMethodID,
+          array,
+          static_cast<jint>(streamer_->getAudioFormatForRecording()),
+          static_cast<jint>(streamer_->getChannelCountForRecording()),
+          static_cast<jint>(streamer_->getSamplingFrequencyForRecording()));
+      env->DeleteLocalRef(array);
+    }
+    if (attached) {
+      javaVM_->DetachCurrentThread();
+    }
+  });
 }
 
 } // extern "C"

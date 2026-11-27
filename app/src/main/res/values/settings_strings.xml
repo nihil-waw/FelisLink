@@ -13,6 +13,13 @@
   <string name="settings_section_display">Picture &amp; display</string>
   <string name="settings_section_about">About</string>
 
+  <string name="settings_theme">App theme</string>
+  <string name="settings_theme_summary">Choose the app color palette. Switching theme restarts the current screen.</string>
+  <string name="theme_dark">Dark (classic)</string>
+  <string name="theme_light">Light</string>
+  <string name="theme_google">Google Material</string>
+  <string name="theme_black">Pure black</string>
+
   <string name="settings_language">Language</string>
   <string name="settings_language_summary">Follow the system language or force one for FelisLink.</string>
   <string name="language_system">Follow system</string>

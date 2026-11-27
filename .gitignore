@@ -18,5 +18,6 @@ local.properties
 
 # Locally built APKs / bundles (publish those through GitHub Releases)
 FelisLink-*.apk
+*-release.apk
 *.aab
 __pycache__/

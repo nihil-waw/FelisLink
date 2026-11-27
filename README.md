@@ -26,7 +26,7 @@ FelisLink 基于 Meta 开源的 [facebookexperimental/usb-video](https://github.
 
 ## 当前状态
 
-版本 **0.5.6**（versionCode 11，应用名 `FelisLink`，包名 `com.felislink.app`）。
+版本 **0.5.8**（versionCode 13，应用名 `FelisLink`，包名 `com.felislink.app`）。
 
 已实现的东西（也就是这套代码当前的全部能力）：
 
@@ -35,10 +35,10 @@ FelisLink 基于 Meta 开源的 [facebookexperimental/usb-video](https://github.
 - **策略引擎**：按实际协商的 USB 速率 + 芯片表 + 用户偏好自动挑格式，给出降级链
 - **自愈**：卡顿自动降一档（含弹窗与「不再提示」）、断流自动重启、插卡自动开始
 - **画面**：填充模式（原始 / 拉伸 / 裁切）、双指缩放平移、双击复位、触控锁定
-- **产出**：截图（`Pictures/FelisLink`）、内置录制采集画面（`Movies/FelisLink`，无声音）
+- **产出**：截图（`Pictures/FelisLink`）、内置录制采集画面（`Movies/FelisLink`，副屏录制时带采集卡 UAC 声音）
 - **系统**：Android 12+（minSdk 31）、arm64-v8a、中文 / English、per-app 语言
 
-还没做：签名 release（目前只有 debug 签名）、arm64 以外的 ABI、亮度调节。HDR / 10-bit（P010）输入已可用，但显示仍经当前 8 位管线，不输出 HDR metadata。
+已支持签名 release（需配置 keystore 与 GitHub Secrets）；还没做：arm64 以外的 ABI、亮度调节。HDR / 10-bit（P010）输入已可用，但显示仍经当前 8 位管线，不输出 HDR metadata。
 
 状态页有三个下拉（色彩格式 / 分辨率 / 帧率），可以从采集卡真实上报的格式里临时切换——只列出设备支持的组合，不会选到黑屏。
 
@@ -52,12 +52,12 @@ FelisLink 基于 Meta 开源的 [facebookexperimental/usb-video](https://github.
 
 ## 安装
 
-1. 到本仓库的 **Releases** 页面下载最新的 `FelisLink-x.y.z-debug.apk`（约 14 MB）
-2. 手机上点开安装（允许「未知来源」），或 `adb install -r FelisLink-x.y.z-debug.apk`
+1. 到本仓库的 **Releases** 页面下载最新的 `FelisLink-x.y.z-release.apk`（约 14 MB，正式签名）
+2. 手机上点开安装（允许「未知来源」），或 `adb install -r FelisLink-x.y.z-release.apk`
 3. 插上采集卡 → 系统弹 USB 权限 → 允许（可勾选"默认用于此设备"）
 4. 在状态页确认设备和格式，点开始
 
-> 目前只有 debug 签名。将来发布正式签名版之前需要卸载 debug 包一次（签名不同）。
+> Releases 优先下载 `-release.apk`；若当前装的是 debug 包，升级到正式签名版前需卸载一次（签名不同）。
 
 ## 使用
 
@@ -115,6 +115,36 @@ FelisLink 基于 Meta 开源的 [facebookexperimental/usb-video](https://github.
 - Android SDK：platform 35 + build-tools 35（`compileSdk 35`、`targetSdk 35`、`minSdk 31`）
 - Gradle 8.9（仓库自带 wrapper）
 - 原生库已预编译并提交在 `app/src/main/jniLibs/arm64-v8a/`，**出 APK 不需要 NDK**；只有改 C++ 才需要
+
+### Release 签名构建
+
+正式发布使用独立签名密钥，密钥不进仓库。本地构建时先生成一次 keystore（示例）：
+
+```bash
+keytool -genkeypair -v -keystore felislink-release.jks -alias felislink \
+  -keyalg RSA -keysize 2048 -validity 10000
+```
+
+然后在用户级 `~/.gradle/gradle.properties`（不要提交）写入：
+
+```properties
+felislink.keystore.file=/绝对路径/felislink-release.jks
+FELISLINK_KEYSTORE_PASSWORD=...
+FELISLINK_KEY_ALIAS=felislink
+FELISLINK_KEY_PASSWORD=...
+```
+
+构建：
+
+```bash
+./gradlew :app:assembleRelease
+# 产物：app/build/outputs/apk/release/app-release.apk
+```
+
+CI 发布：在 GitHub 仓库 Settings → Secrets and variables → Actions 配置
+`FELISLINK_KEYSTORE_BASE64`（`base64 -w0 felislink-release.jks`）、
+`FELISLINK_KEYSTORE_PASSWORD`、`FELISLINK_KEY_ALIAS`、`FELISLINK_KEY_PASSWORD`。
+推送 `v*` tag（如 `v0.5.7`）或在 Actions 页手动运行 `Android Release`，流程会跑单测、构建签名 APK、用 apksigner 验签并创建 GitHub Release。签名的 debug → release 因证书不同不可直接覆盖安装。
 
 ### 标准构建
 
@@ -180,6 +210,7 @@ app/src/main/res/values/          英文默认资源
 app/src/main/res/values-zh/       简中资源（整套 UI，不只设置页）
 docs/DEVELOPMENT.md               开发过程记录（每轮的改动、踩坑、验证方式）
 .github/workflows/android.yml     CI：单测 + 构建 debug APK
+.github/workflows/release.yml     Release：打 v* tag 或手动触发，构建签名 APK 并发布
 ```
 
 ## 已知限制
@@ -193,13 +224,13 @@ docs/DEVELOPMENT.md               开发过程记录（每轮的改动、踩坑�
 - 降级和断流重连都要重启一次采集流才能换格式：会闪一帧黑。真正的无感换格式要改 C++（`uvc_stream_stop/open`），`VideoStreamingConnection.reconfigure()` 留作将来就地重配
 - 卡顿检测基于渲染到 TextureView 的帧率，卡本身的输出抖动会被平滑；不是示波器级的统计
 - 触控锁定只锁画面手势，不锁系统返回/音量
-- 截图只含采集画面本身（不含 HUD、不含缩放）；录制画面录的是采集画面（不含 HUD/系统 UI/其他 App），**没有声音**——录本 App 的音频要改原生 capture policy
+- 截图只含采集画面本身（不含 HUD、不含缩放）；录制画面录的是采集画面（不含 HUD/系统 UI/其他 App）。声音只来自采集卡 UAC 接口，并且只有 FelisLink 当前在非默认 Display（副屏）时才写入 MP4；默认屏录制仍是纯视频，不录手机其他程序或麦克风
 - 录制走「取画面位图 → MediaCodec(EGL) → H.264」，帧率上限 30、长边上限 1920、码率 2–24 Mbps；高分辨率长录时手机发热与丢帧风险比录屏高，属于 Kotlin 侧实现的代价（原生级录制要改 C++）
 - 录制跟画面一致：会包含当前的填充模式/缩放；录制中旋转或改填充不会改变已录文件尺寸
 - 音频输出不在 App 内选：Android 自己把媒体声音送到当前耳机/蓝牙/扬声器；App 内定向需要系统签名权限
 - Android 12 / 12L 未做真机验证：本轮只保证 33-only API 全部有守卫（`LocaleManager`、`RECEIVER_NOT_EXPORTED`、USB 权限 PendingIntent 可变性），首次在 12 上运行请留意
 - 只有 arm64-v8a 预编译库；x86 模拟器跑不了
-- 没有签名 release 流水线：CI 只出 debug APK（`app/build/outputs/apk/debug/app-debug.apk`），正式签名要自己配 keystore
+- 签名 release 需要配置 keystore 与 GitHub Secrets；未配置时 CI 只出 debug APK
 
 ## 路线图
 
@@ -222,7 +253,7 @@ docs/DEVELOPMENT.md               开发过程记录（每轮的改动、踩坑�
 | M3 | HDR / 10-bit 输入（UVC P010）| ✅ 可用（经 8 位显示管线）|
 | P2 | 真 HDR 显示（HDR surface + metadata）| 待开发 |
 | P2 | 未知采集卡硬件识别（VID/PID 标签 + 能力探测）| 待开发 |
-| M3 | 内置录制：录采集画面（MediaCodec+EGL，无 HUD）| ✅ 0.5.2（画面，无声音）|
+| M3 | 内置录制：录采集画面（MediaCodec+EGL，无 HUD）| ✅ 0.5.6（副屏录制带采集卡 UAC 声音）|
 | M3 | 画面填充：原始 / 拉伸 / 裁切 | ✅ 0.5.2 |
 | M3 | 状态页「重置」：按当前设置重新评估并串流 | ✅ 0.5.2 |
 | 单独立项 | 专业显示工具：3D LUT、直方图、波形、斑马纹/伪彩色（需将原生直出改为 GL/EGL 管线）| 评估中 |
@@ -251,7 +282,9 @@ docs/DEVELOPMENT.md               开发过程记录（每轮的改动、踩坑�
 
 | 版本 | 发布日期 | 说明 |
 |---|---|---|
-| 0.5.6 | 2026-11-26 | [详情](docs/DEVELOPMENT.md) |
+| 0.5.8 | 2026-11-27 | [详情](docs/DEVELOPMENT.md) |
+| 0.5.7 | 2026-11-27 | [详情](docs/DEVELOPMENT.md) |
+| 0.5.6 | 2026-11-27 | [详情](docs/DEVELOPMENT.md) |
 | 0.5.5 | 2026-11-25 | [详情](docs/DEVELOPMENT.md) |
 | 0.5.4 | 2026-11-25 | [详情](docs/DEVELOPMENT.md) |
 | 0.5.3 | 2026-11-25 | [详情](docs/DEVELOPMENT.md) |

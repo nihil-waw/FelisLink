@@ -19,6 +19,7 @@ import android.content.Context
 import android.media.AudioManager
 import android.media.AudioTrack
 import android.view.Surface
+import com.meta.usbvideo.media.CaptureVideoRecorder
 import com.meta.usbvideo.usb.AudioStreamingConnection
 import com.meta.usbvideo.usb.AudioStreamingFormatTypeDescriptor
 import com.meta.usbvideo.usb.LibuvcFrameFormat
@@ -95,6 +96,13 @@ object UsbVideoNativeLibrary {
 
   private external fun getUsbDeviceSpeed(): Int
 
+  external fun setAudioRecordingEnabledNative(enabled: Boolean)
+
+  @JvmStatic
+  fun onPcmData(data: ByteArray, androidAudioFormat: Int, channelCount: Int, sampleRate: Int) {
+    CaptureVideoRecorder.onPcmData(data, androidAudioFormat, channelCount, sampleRate)
+  }
+
   fun connectUsbAudioStreaming(
       context: Context,
       audioStreamingConnection: AudioStreamingConnection,
@@ -156,6 +164,8 @@ object UsbVideoNativeLibrary {
   external fun startUsbAudioStreamingNative()
 
   external fun stopUsbAudioStreamingNative()
+
+  external fun isUsbAudioStreamingActiveNative(): Boolean
 
   fun connectUsbVideoStreaming(
       context: Context,

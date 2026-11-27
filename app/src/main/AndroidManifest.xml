@@ -41,7 +41,7 @@ limitations under the License.
     <activity
         android:name=".StreamerActivity"
         android:exported="true"
-        android:theme="@style/Theme.UsbVideo.Fullscreen"
+        android:theme="@style/Theme.UsbVideo"
         android:configChanges="orientation|screenLayout|screenSize|density|layoutDirection|smallestScreenSize|touchscreen|navigation|uiMode"
         android:launchMode="singleTask"
         >
@@ -71,7 +71,7 @@ limitations under the License.
         android:name=".SettingsActivity"
         android:exported="false"
         android:label="@string/settings_title"
-        android:theme="@style/Theme.UsbVideo.Settings"
+        android:theme="@style/Theme.UsbVideo"
         />
     <provider
         android:name="androidx.startup.InitializationProvider"

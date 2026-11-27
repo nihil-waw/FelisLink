@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <condition_variable>
 #include <mutex>
+#include <functional>
 
 #include "RingBuffer.h"
 
@@ -142,7 +143,12 @@ class UsbAudioStreamer final {
   uint32_t samplesFromByteCount(uint32_t bytes) const;
   std::string statsSummaryString() const;
   [[nodiscard]] AudioStatsSummary statsSummary() const;
+  uint32_t getAudioFormatForRecording() const { return jAudioFormat_; }
+  uint8_t getChannelCountForRecording() const { return channelCount_; }
+  uint32_t getSamplingFrequencyForRecording() const { return samplingFrequency_; }
   bool ensureTransferRequests();
+  void setRecordingSink(std::function<void(const uint8_t*, size_t)> sink);
+  void emitRecordingData(const void* data, size_t bytes);
 
  private:
   libusb_context* context_;
@@ -164,6 +170,8 @@ class UsbAudioStreamer final {
   std::atomic<StreamerState> state_{StreamerState::INITIAL};
   std::mutex mutex_;
   std::condition_variable stateChange_;
+  std::mutex recordingMutex_;
+  std::function<void(const uint8_t*, size_t)> recordingSink_;
 
   bool resolveAudioInterface();
   bool startAudioPlayer();

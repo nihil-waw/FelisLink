@@ -356,20 +356,35 @@ class StatusScreenViewHolder(
     val fourccFormats = formatSizeAndFpsGroups.keys
 
     val formatList = fourccFormats.toList()
-    videoFormatSelector.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, formatList)
+    videoFormatSelector.adapter = whiteSpinnerAdapter(formatList)
     videoFormatSelector.setSelection(formatList.indexOf(selectedVideoFormat.fourccFormat).coerceAtLeast(0))
 
     val sizeListMap = formatSizeAndFpsGroups.getValue(selectedVideoFormat.fourccFormat)
     val sizeList = sizeListMap.keys.toList()
-    videoFrameSizeSelector.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, sizeList.map { "${it.width}x${it.height}" })
+    videoFrameSizeSelector.adapter = whiteSpinnerAdapter(sizeList.map { "${it.width}x${it.height}" })
     videoFrameSizeSelector.tag = sizeList
     videoFrameSizeSelector.setSelection(sizeList.indexOf(selectedVideoFormat.size).coerceAtLeast(0))
 
     val fpsList = sizeListMap.getValue(selectedVideoFormat.size)
-    videoFrameFpsSelector.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, fpsList.map { "${it} fps" })
+    videoFrameFpsSelector.adapter = whiteSpinnerAdapter(fpsList.map { "${it} fps" })
     videoFrameFpsSelector.tag = fpsList
     videoFrameFpsSelector.setSelection(fpsList.indexOf(selectedVideoFormat.fps).coerceAtLeast(0))
   }
+
+  private fun <T> whiteSpinnerAdapter(items: List<T>): ArrayAdapter<T> =
+      object : ArrayAdapter<T>(context, android.R.layout.simple_spinner_dropdown_item, items) {
+        override fun getView(position: Int, convertView: View?, parent: android.view.ViewGroup): View {
+          val view = super.getView(position, convertView, parent)
+          (view as? TextView)?.setTextColor(android.graphics.Color.WHITE)
+          return view
+        }
+
+        override fun getDropDownView(position: Int, convertView: View?, parent: android.view.ViewGroup): View {
+          val view = super.getDropDownView(position, convertView, parent)
+          (view as? TextView)?.setTextColor(android.graphics.Color.WHITE)
+          return view
+        }
+      }
 
   private fun hideVideoFormatSection() {
     videoFormatSelectorHeading.isVisible = false

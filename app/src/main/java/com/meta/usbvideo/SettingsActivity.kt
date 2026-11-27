@@ -43,14 +43,17 @@ class SettingsActivity : ComponentActivity() {
   private lateinit var settings: SettingsStore
   private lateinit var rows: LinearLayout
   private var recreatedForLocale = false
+  private var appliedTheme = ThemePref.DARK
 
   override fun attachBaseContext(newBase: android.content.Context) {
     super.attachBaseContext(LocaleSupport.wrap(newBase))
+    ThemeHelper.apply(this)
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     settings = SettingsStore.get(this)
+    appliedTheme = settings.theme
     applyRotation()
     setContentView(R.layout.activity_settings)
     rows = findViewById(R.id.settings_rows)
@@ -62,6 +65,11 @@ class SettingsActivity : ComponentActivity() {
     super.onResume()
     applyRotation()
     applyWindowSettings()
+    if (settings.theme != appliedTheme) {
+      appliedTheme = settings.theme
+      recreate()
+      return
+    }
     val desired = settings.language
     if (desired.tag != null && !recreatedForLocale) {
       val current = resources.configuration.locales[0].toLanguageTag()
@@ -105,6 +113,22 @@ class SettingsActivity : ComponentActivity() {
     rows.removeAllViews()
 
     addSection(R.string.settings_section_general)
+    addChoiceRow(
+        R.string.settings_theme,
+        R.string.settings_theme_summary,
+        themeLabel(settings.theme),
+    ) {
+      showChoices(
+          R.string.settings_theme,
+          listOf(ThemePref.DARK, ThemePref.LIGHT, ThemePref.GOOGLE, ThemePref.BLACK),
+          ::themeLabel,
+          settings.theme,
+      ) { pref ->
+        settings.theme = pref
+        appliedTheme = pref
+        recreate()
+      }
+    }
     addChoiceRow(
         R.string.settings_language,
         R.string.settings_language_summary,
@@ -384,6 +408,14 @@ class SettingsActivity : ComponentActivity() {
   private fun presetLabel(preset: CapturePreset): String = getString(preset.labelRes())
 
   // ---- labels ----
+
+  private fun themeLabel(pref: ThemePref): String =
+      when (pref) {
+        ThemePref.DARK -> getString(R.string.theme_dark)
+        ThemePref.LIGHT -> getString(R.string.theme_light)
+        ThemePref.GOOGLE -> getString(R.string.theme_google)
+        ThemePref.BLACK -> getString(R.string.theme_black)
+      }
 
   private fun languageLabel(pref: LanguagePref): String =
       when (pref) {

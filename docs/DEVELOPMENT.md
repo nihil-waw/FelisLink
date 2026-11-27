@@ -10,6 +10,23 @@
 
 # 变更日志（CHANGELOG）
 
+## [0.5.8] - 2026-11-27
+
+### Changed
+- 按构建规则升级版本号到 0.5.8 / versionCode 13，构建 debug APK 并放入发布包目录。
+
+## [0.5.7] - 2026-11-27
+
+### Added
+- 设置页新增应用主题：深色（经典）、浅色、Google Material、纯黑，主题切换后当前页面重建以应用新配色。
+- 状态页色彩格式 / 分辨率 / 帧率三个下拉的文字改为白色，背景仍保持深色。
+
+## [0.5.6] - 2026-11-27
+
+### Added
+- 录制支持声音：从 UAC→AAudio 播放链路旁路 PCM，按真实采样率编码 AAC 并与 H.264 视频合成到同一个 MP4。声音只从采集卡 UAC 接口来，不录手机其他程序或麦克风。
+- 录音门控：只有 FelisLink 当前 `Display.displayId` 不是 `Display.DEFAULT_DISPLAY`（副屏）时才启用 AAC 音轨；在默认屏录制时只保存视频。
+
 > 以下内容合并自原 `CHANGELOG.md`，采用 Keep a Changelog 格式，按版本倒序。
 
 本文件记录 FelisLink（Meta usb-video 的二次开发分支）自己的改动；上游历史见

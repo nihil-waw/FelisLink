@@ -5,7 +5,7 @@
   <string name="capture_record_stop">停止录制</string>
   <string name="screenshot_saved">截图已保存到相册 Pictures/FelisLink</string>
   <string name="screenshot_failed">截图失败：画面还没就绪</string>
-  <string name="recording_started">开始录制采集画面（无声音）</string>
+  <string name="recording_started">开始录制采集画面（在副屏时录声音）</string>
   <string name="recording_denied">未授权</string>
   <string name="recording_failed">录制启动失败</string>
   <string name="recording_saved">录制已保存到 Movies/FelisLink</string>

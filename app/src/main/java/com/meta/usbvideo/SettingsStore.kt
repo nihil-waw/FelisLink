@@ -21,6 +21,18 @@ import com.meta.usbvideo.usb.VideoStreamingConnection
 import kotlin.math.abs
 import kotlin.math.min
 
+/** App color theme. DARK is the previous FelisLink palette. */
+enum class ThemePref {
+  DARK,
+  LIGHT,
+  GOOGLE,
+  BLACK;
+
+  companion object {
+    fun fromName(name: String?): ThemePref = entries.firstOrNull { it.name == name } ?: DARK
+  }
+}
+
 /** Language selection. [tag] is null when the app should follow the system language. */
 enum class LanguagePref(val tag: String?) {
   SYSTEM(null),
@@ -158,6 +170,10 @@ object LocaleRecreateGuard {
 class SettingsStore private constructor(private val context: Context) {
 
   private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+  var theme: ThemePref
+    get() = ThemePref.fromName(prefs.getString(KEY_THEME, null))
+    set(value) = putString(KEY_THEME, value.name)
 
   var language: LanguagePref
     get() = LanguagePref.fromName(prefs.getString(KEY_LANGUAGE, null))
@@ -310,6 +326,7 @@ class SettingsStore private constructor(private val context: Context) {
 
   companion object {
     private const val PREFS_NAME = "felislink.settings"
+    private const val KEY_THEME = "theme"
     private const val KEY_LANGUAGE = "language"
     private const val KEY_ROTATION = "rotation"
     private const val KEY_RESOLUTION = "resolution"

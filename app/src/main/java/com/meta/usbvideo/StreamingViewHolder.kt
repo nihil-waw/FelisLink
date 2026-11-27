@@ -16,6 +16,7 @@
 package com.meta.usbvideo
 
 import android.app.AlertDialog
+import android.view.Display
 import android.graphics.Matrix
 import android.graphics.SurfaceTexture
 import android.os.Handler
@@ -260,9 +261,26 @@ class StreamingViewHolder(
   private var recordFrameIntervalMs = 33L
   private var recordingErrorShown = false
 
+  /** The HDMI source is the second screen only when FelisLink is on a non-default display. */
+  private fun shouldRecordCaptureAudio(): Boolean {
+    val displayId =
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+          rootView.display?.displayId ?: Display.DEFAULT_DISPLAY
+        } else {
+          Display.DEFAULT_DISPLAY
+        }
+    if (displayId == Display.DEFAULT_DISPLAY) {
+      return false
+    }
+    // Only enable the recorder's AAC track when the capture card really streams UAC audio.
+    // Otherwise the muxer would wait forever for an audio track that never arrives.
+    return UsbVideoNativeLibrary.isUsbAudioStreamingActiveNative()
+  }
+
   private fun toggleRecording() {
     if (CaptureVideoRecorder.isRecording()) {
       CaptureVideoRecorder.stop()
+      UsbVideoNativeLibrary.setAudioRecordingEnabledNative(false)
       Toast.makeText(rootView.context, R.string.recording_saved, Toast.LENGTH_SHORT).show()
       return
     }
@@ -279,7 +297,9 @@ class StreamingViewHolder(
     recordFrameIntervalMs = (1000L / minOf(format.fps, 30)).coerceAtLeast(16L)
     recordingErrorShown = false
     lastRecordFrameAt = 0L
-    if (CaptureVideoRecorder.start(rootView.context, viewWidth, viewHeight, format.fps)) {
+    val withAudio = shouldRecordCaptureAudio()
+    if (CaptureVideoRecorder.start(rootView.context, viewWidth, viewHeight, format.fps, withAudio)) {
+      UsbVideoNativeLibrary.setAudioRecordingEnabledNative(withAudio)
       Toast.makeText(rootView.context, R.string.recording_started, Toast.LENGTH_SHORT).show()
     } else {
       Toast.makeText(rootView.context, R.string.recording_failed, Toast.LENGTH_SHORT).show()

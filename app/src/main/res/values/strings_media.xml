@@ -5,7 +5,7 @@
   <string name="capture_record_stop">Stop rec</string>
   <string name="screenshot_saved">Screenshot saved to Pictures/FelisLink</string>
   <string name="screenshot_failed">Screenshot failed: frame not ready</string>
-  <string name="recording_started">Recording started (video only, no audio)</string>
+  <string name="recording_started">Recording started (video; audio when on second screen)</string>
   <string name="recording_denied">Recording was not authorised</string>
   <string name="recording_failed">Could not start recording</string>
   <string name="recording_saved">Recording saved to Movies/FelisLink</string>

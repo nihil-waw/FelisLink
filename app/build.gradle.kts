@@ -13,6 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// FELISLINK-SIGNING-START
+// CI injects FELISLINK_KEYSTORE_* env vars; local builds may set the same names in ~/.gradle/gradle.properties.
+val releaseKeystoreFile: String? = providers.gradleProperty("felislink.keystore.file").orNull
+val releaseKeystorePassword: String? = providers.environmentVariable("FELISLINK_KEYSTORE_PASSWORD").orElse(providers.gradleProperty("FELISLINK_KEYSTORE_PASSWORD")).orNull
+val releaseKeyAlias: String? = providers.environmentVariable("FELISLINK_KEY_ALIAS").orElse(providers.gradleProperty("FELISLINK_KEY_ALIAS")).orNull
+val releaseKeyPassword: String? = providers.environmentVariable("FELISLINK_KEY_PASSWORD").orElse(providers.gradleProperty("FELISLINK_KEY_PASSWORD")).orNull
+val hasReleaseSigning = !releaseKeystoreFile.isNullOrBlank() &&
+  !releaseKeystorePassword.isNullOrBlank() &&
+  !releaseKeyAlias.isNullOrBlank() &&
+  !releaseKeyPassword.isNullOrBlank()
+// FELISLINK-SIGNING-END
+
 plugins {
   id("com.android.application")
   id("org.jetbrains.kotlin.android")
@@ -26,15 +38,29 @@ android {
     applicationId = "com.felislink.app"
     minSdk = 31
     targetSdk = 35
-    versionCode = 11
-    versionName = "0.5.6"
+    versionCode = 13
+    versionName = "0.5.8"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+  }
+
+  signingConfigs {
+    if (hasReleaseSigning) {
+      create("release") {
+        storeFile = file(releaseKeystoreFile!!)
+        storePassword = releaseKeystorePassword
+        keyAlias = releaseKeyAlias
+        keyPassword = releaseKeyPassword
+      }
+    }
   }
 
   buildTypes {
     release {
       isMinifyEnabled = false
+      if (hasReleaseSigning) {
+        signingConfig = signingConfigs.getByName("release")
+      }
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
   }
